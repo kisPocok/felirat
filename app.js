@@ -1,12 +1,31 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
+var express      = require('express');
+var path         = require('path');
+var favicon      = require('serve-favicon');
+var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+var bodyParser   = require('body-parser');
+
+var fs           = require('fs');
+var sceneRelease = require('parse-torrent-name');
+var sceneReleaseBackup = require('scene-release');
+
+var Q            = require('q');
+var OpenSubtitles = require('./app/OpenSubtitles');
+var api = new OpenSubtitles();
+
+// OpenSubtitles
+Q.fcall(api.connect())
+    .then(api.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
+    .then(api.searchSubtitles('Mr.Robot.S01E01.PROPER.720p.HDTV.X264-DIMENSION', 1, 1, 'hun', 1))
+    .then(function (response) {
+        console.log('Got it!', response.data[0].SubFileName);
+    })
+    .catch(function (error) {
+        console.log('errors', error)
+    }).done();
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var users  = require('./routes/users');
 
 var app = express();
 
@@ -27,33 +46,42 @@ app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
+
+/*
+fs.exists('./example_data/mr.robot.101.720p-dimension.mkv', function (exists) {
+    if (!exists) {
+        return console.error('Error message:', '"' + err.message + '"');
+    }
+    console.log('Got it!');
+});
+*/
 
 // error handlers
 
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
     });
-  });
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
 });
 
 
