@@ -1,11 +1,6 @@
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
 
-var Q            = require('q');
-var Subtitle     = require('../../app/OpenSubtitles');
-var subtitleApi  = new Subtitle();
-var downloadSubtitle = require('../../app/SubtitleDownloader');
-
 // Report crashes to our server.
 require('crash-reporter').start();
 

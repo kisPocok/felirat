@@ -43,7 +43,7 @@
             // TODO ha fájlnévből nem megy mappa nevéből esetleg?
             // TODO filename végén kiterjesztést le kell szedni! (mkv/mp4/mi más?)
 
-            var MovieHelper = require('./app/MovieHelper');
+            var MovieHelper = require('./App/MovieHelper');
             if (MovieHelper.isSubtitle(filename) === true) {
                 console.log('Huh?'); // TODO feliratot nem töltünk le újra :)
                 return;
@@ -54,11 +54,10 @@
                 return;
             }
 
-
             var Q            = require('q');
-            var Subtitle     = require('./app/OpenSubtitles');
+            var Subtitle     = require('./App/OpenSubtitles');
             var subtitleApi  = new Subtitle();
-            var downloadSubtitle = require('./app/SubtitleDownloader');
+            var downloadSubtitle = require('./App/SubtitleDownloader');
 
             var passSourceAndOutputParams = function(searchResponse) {
                 var finalFileName = MovieHelper.removeFileExtension(filename);
