@@ -1,0 +1,93 @@
+<html>
+<head>
+    <title>Felirat</title>
+    <style>
+        body {
+            margin: 20px;
+        }
+        #holder {
+            border: 10px dashed #ccc;
+            width: 300px;
+            height: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 85%;
+        }
+        #holder.hover { border-color: #333; }
+    </style>
+</head>
+<body>
+    <div id="holder"></div>
+    <script>
+        // prevent default behavior from changing page on dropped file
+        window.ondragover = function(e) { e.preventDefault(); return false };
+        window.ondrop = function(e) { e.preventDefault(); return false };
+
+        var holder = document.getElementById('holder');
+        holder.ondragover = function () { this.className = 'hover'; return false; };
+        holder.ondragleave = function () { this.className = ''; return false; };
+        holder.ondrop = function (e) {
+            e.preventDefault();
+
+            var file = e.dataTransfer.files[0];
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                console.log('FIRE', event.target);
+            };
+            console.log(file);
+            downloadSubtitle(file.name, file.path, 'hun');
+            return false;
+        };
+
+        var downloadSubtitle = function (filename, path, lang) {
+            // TODO ha fájlnévből nem megy mappa nevéből esetleg?
+            // TODO filename végén kiterjesztést le kell szedni! (mkv/mp4/mi más?)
+
+            var MovieHelper = require('./app/MovieHelper');
+            if (MovieHelper.isSubtitle(filename) === true) {
+                console.log('Huh?'); // TODO feliratot nem töltünk le újra :)
+                return;
+            }
+
+            if (MovieHelper.isDir(path) === true) {
+                console.log('Directory not supported yet!'); // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
+                return;
+            }
+
+
+            var Q            = require('q');
+            var Subtitle     = require('./app/OpenSubtitles');
+            var subtitleApi  = new Subtitle();
+            var downloadSubtitle = require('./app/SubtitleDownloader');
+
+            var passSourceAndOutputParams = function(searchResponse) {
+                var finalFileName = MovieHelper.removeFileExtension(filename);
+                return {
+                    source: subtitleApi.getGzipUrl(searchResponse),
+                    destination: MovieHelper.baseDir(path) + MovieHelper.srtFileName(finalFileName, lang)
+                };
+            };
+
+            Q.fcall(subtitleApi.connect())
+                .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
+                .then(subtitleApi.searchSubtitles(filename, 1, 1, 'hun', 1))
+                .then(passSourceAndOutputParams)
+                .then(downloadSubtitle)
+                .then(function (downloadStatus) {
+                    var response = {
+                        writable: downloadStatus.writable,
+                        path: downloadStatus.path,
+                        mode: downloadStatus.mode,
+                        flags: downloadStatus.flags
+                    };
+                    console.log('Download response:', response);
+                    return response;
+                })
+                .catch(function (error) {
+                    console.log('errors', error);
+                })
+                .done();
+        };
+    </script>
+</body>
+</html>

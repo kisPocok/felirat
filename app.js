@@ -5,29 +5,55 @@ var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 
-var fs           = require('fs');
 var sceneRelease = require('parse-torrent-name');
 var sceneReleaseBackup = require('scene-release');
 
-var Q            = require('q');
-var OpenSubtitles = require('./app/OpenSubtitles');
-var api = new OpenSubtitles();
 
-// OpenSubtitles
-Q.fcall(api.connect())
-    .then(api.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-    .then(api.searchSubtitles('Mr.Robot.S01E01.PROPER.720p.HDTV.X264-DIMENSION', 1, 1, 'hun', 1))
-    .then(function (response) {
-        console.log('Got it!', response.data[0].SubFileName);
+var Q            = require('q');
+var Subtitle     = require('./app/OpenSubtitles');
+var subtitleApi  = new Subtitle();
+var downloadSubtitle = require('./app/SubtitleDownloader');
+
+/*
+Q.fcall(subtitleApi.connect())
+    .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
+    .then(subtitleApi.searchSubtitles('Mr.Robot.S01E01.PROPER.720p.HDTV.X264-DIMENSION', 1, 1, 'hun', 1))
+    .then(function passSourceAndOutputParams(response) {
+        return {
+            source: response.data[0].SubDownloadLink,
+            destination: './example_data/example_sub.srt'
+        };
+    })
+    .then(downloadSubtitle)
+    .then(function (downloadStatus) {
+        var response = {
+            writable: downloadStatus.writable,
+            path: downloadStatus.path,
+            mode: downloadStatus.mode,
+            flags: downloadStatus.flags
+        };
+        console.log(response);
     })
     .catch(function (error) {
-        console.log('errors', error)
-    }).done();
+        console.log('errors', error);
+    })
+    .done();
+*/
 
-var routes = require('./routes/index');
-var users  = require('./routes/users');
+/*
+ fs.exists('./example_data/mr.robot.101.720p-dimension.mkv', function (exists) {
+ if (!exists) {
+ return console.error('Error message:', '"' + err.message + '"');
+ }
+ console.log('Got it!');
+ });
+ */
 
 var app = express();
+
+var routes = require('./routes/index');
+//var users  = require('./routes/users');
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -42,7 +68,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
+//app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -50,15 +76,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
-/*
-fs.exists('./example_data/mr.robot.101.720p-dimension.mkv', function (exists) {
-    if (!exists) {
-        return console.error('Error message:', '"' + err.message + '"');
-    }
-    console.log('Got it!');
-});
-*/
 
 // error handlers
 
@@ -84,5 +101,6 @@ app.use(function(err, req, res, next) {
     });
 });
 
+/* end */
 
 module.exports = app;

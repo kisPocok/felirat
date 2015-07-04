@@ -2,6 +2,7 @@
   "name": "nodetest2",
   "version": "0.0.0",
   "private": true,
+  "main": "./bin/www",
   "scripts": {
     "start": "nodemon ./bin/www"
   },
@@ -16,6 +17,10 @@
     "scene-release": "1.*",
     "parse-torrent-name": "*",
     "xmlrpc": "1.3.*",
-    "q": "*"
+    "q": "*",
+    "request": "*"
+  },
+  "devDependencies": {
+    "electron-prebuilt": "^0.29.1"
   }
 }
