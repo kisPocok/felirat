@@ -31,4 +31,14 @@ MovieHelper.srtFileName = function (fileName, lang) {
     return fileName + '.' + lang + '.' + MovieHelper.subtitleExtension;
 };
 
+MovieHelper.wrapperPassSourceAndOutputParams = function (subtitleApi, filename, path, lang) {
+    return function passSourceAndOutputParams(searchResponse) {
+        var finalFileName = MovieHelper.removeFileExtension(filename);
+        return {
+            source: subtitleApi.getGzipUrl(searchResponse),
+            destination: MovieHelper.baseDir(path) + MovieHelper.srtFileName(finalFileName, lang)
+        };
+    };
+};
+
 module.exports = MovieHelper;

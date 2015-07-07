@@ -1,8 +1,8 @@
 {
-  "name": "nodetest2",
+  "name": "felirat",
   "version": "0.1.0",
   "private": true,
-  "main": "app.js",
+  "main": "index.html",
   "scripts": {
     "start": "nodemon ./bin/www"
   },
@@ -20,7 +20,19 @@
     "q": "*",
     "request": "*"
   },
-  "devDependencies": {
-    "electron-prebuilt": "^0.29.1"
+  "window": {
+    "title": "Felirat v2",
+    "transparent": true,
+    "frame": false,
+    "toolbar": false,
+    "show": true,
+    "position": "center",
+    "resizable": false,
+    "width": 360,
+    "height": 360,
+    "min_width": 360,
+    "min_height": 360,
+    "max_width": 360,
+    "max_height": 360
   }
 }

@@ -4,6 +4,11 @@
     <style>
         body {
             margin: 20px;
+            background-color: rgba(255,255,255,0.1);
+            -webkit-app-region: drag;
+        }
+        button {
+            -webkit-app-region: no-drag;
         }
         #holder {
             border: 10px dashed #ccc;
@@ -11,14 +16,27 @@
             height: 300px;
             margin-left: auto;
             margin-right: auto;
-            max-width: 85%;
         }
-        #holder.hover { border-color: #333; }
+        #holder.hover { border-color: #fff; }
     </style>
 </head>
 <body>
     <div id="holder"></div>
     <script>
+        var gui = require('nw.gui');
+
+        // Extend application menu for Mac OS
+        if (process.platform == "darwin") {
+            var menu = new gui.Menu({type: "menubar"});
+            menu.createMacBuiltin && menu.createMacBuiltin(window.document.title);
+            gui.Window.get().menu = menu;
+        }
+
+        //localStorage.lang = 'hun'
+
+        //var win = gui.Window.get();
+        //win.showDevTools();
+
         // prevent default behavior from changing page on dropped file
         window.ondragover = function(e) { e.preventDefault(); return false };
         window.ondrop = function(e) { e.preventDefault(); return false };
@@ -40,10 +58,11 @@
         };
 
         var downloadSubtitle = function (filename, path, lang) {
+
             // TODO ha fájlnévből nem megy mappa nevéből esetleg?
             // TODO filename végén kiterjesztést le kell szedni! (mkv/mp4/mi más?)
 
-            var MovieHelper = require('./App/MovieHelper');
+            var MovieHelper = require('./resources/MovieHelper');
             if (MovieHelper.isSubtitle(filename) === true) {
                 console.log('Huh?'); // TODO feliratot nem töltünk le újra :)
                 return;
@@ -55,17 +74,11 @@
             }
 
             var Q            = require('q');
-            var Subtitle     = require('./App/OpenSubtitles');
+            var Subtitle     = require('./resources/OpenSubtitles');
             var subtitleApi  = new Subtitle();
-            var downloadSubtitle = require('./App/SubtitleDownloader');
+            var downloadSubtitle = require('./resources/SubtitleDownloader');
 
-            var passSourceAndOutputParams = function(searchResponse) {
-                var finalFileName = MovieHelper.removeFileExtension(filename);
-                return {
-                    source: subtitleApi.getGzipUrl(searchResponse),
-                    destination: MovieHelper.baseDir(path) + MovieHelper.srtFileName(finalFileName, lang)
-                };
-            };
+            var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, filename, path, lang);
 
             Q.fcall(subtitleApi.connect())
                 .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
@@ -79,7 +92,8 @@
                         mode: downloadStatus.mode,
                         flags: downloadStatus.flags
                     };
-                    console.log('Download response:', response);
+                    console.log('Download response coming');
+                    console.log(response);
                     return response;
                 })
                 .catch(function (error) {
