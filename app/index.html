@@ -1,27 +1,53 @@
 <html>
 <head>
     <title>Felirat</title>
+    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.red-blue.min.css" /> ">
+    <script src="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
         body {
-            margin: 20px;
-            background-color: rgba(255,255,255,0.1);
+            /*margin: 20px;
+            background-color: rgba(255,255,255,0.1);*/
             -webkit-app-region: drag;
         }
         button {
             -webkit-app-region: no-drag;
         }
-        #holder {
-            border: 10px dashed #ccc;
-            width: 300px;
-            height: 300px;
-            margin-left: auto;
-            margin-right: auto;
+        #holder.hover > .mdl-card__title {
+            background-color: red;
         }
-        #holder.hover { border-color: #fff; }
+
+        .demo-card-square.mdl-card {
+            width: 320px;
+            height: 300px;
+        }
+        .demo-card-square > .mdl-card__title {
+            color: #fff;
+            background: url('../assets/demos/dog.png') bottom right 15% no-repeat #46B6AC;
+        }
+        .subtitle-icon {
+            font-size: 30px;
+            margin-right: 5px;
+            margin-top: 1px;
+        }
     </style>
 </head>
 <body>
-    <div id="holder"></div>
+    <div id="holder" class="mdl-card mdl-shadow--2dp demo-card-square">
+        <div class="mdl-card__title mdl-card--expand">
+            <h2 class="mdl-card__title-text"><i class="material-icons  subtitle-icon">subtitles</i>Felirat</h2>
+        </div>
+        <div class="mdl-card__supporting-text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Aenan convallis.
+        </div>
+        <div class="mdl-card__actions mdl-card--border">
+            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                View Updates
+            </a>
+        </div>
+    </div>
+
     <script>
         var gui = require('nw.gui');
 
@@ -34,8 +60,9 @@
 
         //localStorage.lang = 'hun'
 
-        //var win = gui.Window.get();
-        //win.showDevTools();
+        // Developer Console
+        var win = gui.Window.get();
+        win.showDevTools();
 
         // prevent default behavior from changing page on dropped file
         window.ondragover = function(e) { e.preventDefault(); return false };

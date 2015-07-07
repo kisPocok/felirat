@@ -28,11 +28,11 @@
     "show": true,
     "position": "center",
     "resizable": false,
-    "width": 360,
-    "height": 360,
-    "min_width": 360,
-    "min_height": 360,
-    "max_width": 360,
-    "max_height": 360
+    "width": 320,
+    "height": 320,
+    "min_width": 320,
+    "min_height": 320,
+    "max_width": 320,
+    "max_height": 320
   }
 }
