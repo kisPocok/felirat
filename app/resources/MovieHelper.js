@@ -16,6 +16,9 @@ MovieHelper.removeFileExtension = function (fileName) {
 };
 
 MovieHelper.getFileExtension = function (fileName) {
+    if (!fileName) {
+        throw new Error('MISSING FILE!');
+    }
     return fileName.split('.').pop();
 };
 

@@ -1,133 +1,32 @@
 <html>
 <head>
-    <title>Felirat</title>
-    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.red-blue.min.css" /> ">
-    <script src="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
+    <meta charset="utf-8">
+    <title>DogTitle</title>
+    <link rel="stylesheet" href="material-design-lite/material.css" />
+    <script src="material-design-lite/material.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <style>
-        body {
-            /*margin: 20px;
-            background-color: rgba(255,255,255,0.1);*/
-            -webkit-app-region: drag;
-        }
-        button {
-            -webkit-app-region: no-drag;
-        }
-        #holder.hover > .mdl-card__title {
-            background-color: red;
-        }
-
-        .demo-card-square.mdl-card {
-            width: 320px;
-            height: 300px;
-        }
-        .demo-card-square > .mdl-card__title {
-            color: #fff;
-            background: url('../assets/demos/dog.png') bottom right 15% no-repeat #46B6AC;
-        }
-        .subtitle-icon {
-            font-size: 30px;
-            margin-right: 5px;
-            margin-top: 1px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-    <div id="holder" class="mdl-card mdl-shadow--2dp demo-card-square">
-        <div class="mdl-card__title mdl-card--expand">
-            <h2 class="mdl-card__title-text"><i class="material-icons  subtitle-icon">subtitles</i>Felirat</h2>
+    <div class="mdl-card  mdl-shadow--2dp  demo-card-square">
+        <div class="mdl-card__title  mdl-card--expand">
+            <div class="mdl-card__dropfiles">
+                <!--<i class="material-icons">queue</i>-->
+                Drop here!
+            </div>
+            <span id="logo">Pörkölt</span>
+            <h1 class="mdl-card__title">DogTitle</h1>
         </div>
         <div class="mdl-card__supporting-text">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Aenan convallis.
+            Just drop your videos here and <b>DogTitle</b> will find the right subtitle for your movies and TV shows.
         </div>
         <div class="mdl-card__actions mdl-card--border">
-            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                View Updates
-            </a>
+            <button id="caption1" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                Select language
+            </button>
         </div>
     </div>
-
-    <script>
-        var gui = require('nw.gui');
-
-        // Extend application menu for Mac OS
-        if (process.platform == "darwin") {
-            var menu = new gui.Menu({type: "menubar"});
-            menu.createMacBuiltin && menu.createMacBuiltin(window.document.title);
-            gui.Window.get().menu = menu;
-        }
-
-        //localStorage.lang = 'hun'
-
-        // Developer Console
-        var win = gui.Window.get();
-        win.showDevTools();
-
-        // prevent default behavior from changing page on dropped file
-        window.ondragover = function(e) { e.preventDefault(); return false };
-        window.ondrop = function(e) { e.preventDefault(); return false };
-
-        var holder = document.getElementById('holder');
-        holder.ondragover = function () { this.className = 'hover'; return false; };
-        holder.ondragleave = function () { this.className = ''; return false; };
-        holder.ondrop = function (e) {
-            e.preventDefault();
-
-            var file = e.dataTransfer.files[0];
-            var reader = new FileReader();
-            reader.onload = function (event) {
-                console.log('FIRE', event.target);
-            };
-            console.log(file);
-            downloadSubtitle(file.name, file.path, 'hun');
-            return false;
-        };
-
-        var downloadSubtitle = function (filename, path, lang) {
-
-            // TODO ha fájlnévből nem megy mappa nevéből esetleg?
-            // TODO filename végén kiterjesztést le kell szedni! (mkv/mp4/mi más?)
-
-            var MovieHelper = require('./resources/MovieHelper');
-            if (MovieHelper.isSubtitle(filename) === true) {
-                console.log('Huh?'); // TODO feliratot nem töltünk le újra :)
-                return;
-            }
-
-            if (MovieHelper.isDir(path) === true) {
-                console.log('Directory not supported yet!'); // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
-                return;
-            }
-
-            var Q            = require('q');
-            var Subtitle     = require('./resources/OpenSubtitles');
-            var subtitleApi  = new Subtitle();
-            var downloadSubtitle = require('./resources/SubtitleDownloader');
-
-            var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, filename, path, lang);
-
-            Q.fcall(subtitleApi.connect())
-                .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-                .then(subtitleApi.searchSubtitles(filename, 1, 1, 'hun', 1))
-                .then(passSourceAndOutputParams)
-                .then(downloadSubtitle)
-                .then(function (downloadStatus) {
-                    var response = {
-                        writable: downloadStatus.writable,
-                        path: downloadStatus.path,
-                        mode: downloadStatus.mode,
-                        flags: downloadStatus.flags
-                    };
-                    console.log('Download response coming');
-                    console.log(response);
-                    return response;
-                })
-                .catch(function (error) {
-                    console.log('errors', error);
-                })
-                .done();
-        };
-    </script>
+    <script src="resources/LiveReload.js"></script>
+    <script src="resources/AppControl.js"></script>
 </body>
 </html>

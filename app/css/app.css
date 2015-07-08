@@ -1,0 +1,71 @@
+
+/* San Francisco font */
+@import url(../font/usesf.css);
+
+/* App design */
+body {
+	-webkit-app-region: drag;
+	overflow:hidden;
+}
+.mdl-card__supporting-text {
+	transition: margin 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+}
+.mdl-card__supporting-text b {
+	font-weight: 900;
+	font-size: 90%;
+}
+body.dragging .mdl-card__supporting-text { margin-top: -70px; }
+.mdl-card__supporting-text, .mdl-card__supporting-text * {
+	pointer-events: none;
+}
+
+button {
+	-webkit-app-region: no-drag;
+}
+
+.demo-card-square.mdl-card {
+	width: 320px;
+	height: 320px;
+	border-radius: 0;
+}
+.demo-card-square > .mdl-card__title,
+.demo-card-square > .mdl-card__dropfiles {
+	color: #fff;
+	background: bottom right 15% no-repeat #46B6AC;
+}
+
+.mdl-card__dropfiles {
+	text-align: center;
+	/*display: none;*/
+	position: absolute;
+	width: 290px;
+	top: -50px;
+	transition: all 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+}
+.dragging .mdl-card__dropfiles { /*display: inline-block;*/ top: 10px; }
+
+.mdl-card__title {
+	position: relative;
+	color: #fff;
+}
+.mdl-card__title h1 {
+	padding-left: 0;
+	padding-right: 0;
+}
+.subtitle-icon {
+	font-size: 90px;
+	margin-top: 1px;
+	position: absolute;
+	right: 10px;
+	bottom: 0;
+}
+#logo {
+	background-image: url(../images/porkolt160.jpg);
+	background-size: 100% 100%;
+	width: 80px;
+	height: 80px;
+	text-indent: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	margin-left: 5px;
+}
