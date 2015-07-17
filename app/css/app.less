@@ -1,29 +1,33 @@
+
 /* San Francisco font */
 @import '../font/usesf.css';
+
 /* Material Design Icons */
 @import '../font/material.css';
+
 /* App design */
 body {
   -webkit-app-region: drag;
-  overflow: hidden;
+  overflow:hidden;
 }
 #description {
-  transition: margin 400ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: margin 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  b {
+    font-weight: 900;
+    font-size: 90%;
+  }
 }
-#description b {
-  font-weight: 900;
-  font-size: 90%;
-}
-body.dragging #description {
-  margin-top: -70px;
-}
+
+body.dragging #description { margin-top: -70px; }
 #description,
-#description * {
+#description * {
   pointer-events: none;
 }
+
 button {
   -webkit-app-region: no-drag;
 }
+
 .demo-card-square.mdl-card {
   width: 320px;
   height: 320px;
@@ -32,27 +36,26 @@ button {
 .demo-card-square > .mdl-card__title,
 .demo-card-square > .mdl-card__dropfiles {
   color: #fff;
-  background: bottom right 15% no-repeat #46b6ac;
+  background: bottom right 15% no-repeat #46B6AC;
 }
+
 .mdl-card__dropfiles {
   text-align: center;
   /*display: none;*/
   position: absolute;
   width: 290px;
   top: -50px;
-  transition: all 400ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
 }
-.dragging .mdl-card__dropfiles {
-  /*display: inline-block;*/
-  top: 10px;
-}
+.dragging .mdl-card__dropfiles { /*display: inline-block;*/ top: 10px; }
+
 .mdl-card__title {
   position: relative;
   color: #fff;
-}
-.mdl-card__title h1 {
-  padding-left: 0;
-  padding-right: 0;
+  h1 {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 .subtitle-icon {
   font-size: 90px;
@@ -74,18 +77,18 @@ button {
 #list {
   padding-left: 0;
   font-size: 12px;
-}
-#list li {
-  list-style: none;
-}
-#list li i {
-  float: right;
-  width: 32px;
-  text-align: right;
-}
-#list li span {
-  width: -webkit-calc(68%);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  li {
+    list-style: none;
+    i {
+      float: right;
+      width: 32px;
+      text-align: right;
+    }
+    span {
+      width: -webkit-calc(100% - 32px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }

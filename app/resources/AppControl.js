@@ -1,6 +1,18 @@
 
 var gui = require('nw.gui')
+
+/* hide window while the app is loading
+onload = function() {
+    gui.Window.get().show();
+}
+*/
+
 var win = gui.Window.get();
+var DogTitle = {};
+
+win.on('minimize', function() {
+    console.log('Window is minimized');
+});
 
 // Extend application menu for Mac OS
 if (process.platform == "darwin") {
@@ -23,40 +35,83 @@ var exceptions = [
     'material-icons',
 ];
 
+var UI = new (function DogTitleUI () {
+    this.appBody = document.getElementsByTagName('body')[0];
+    this.onFileDrag = function () {
+        this.appBody.className = 'dragging';
+    };
+    this.onFileDrop = function () {
+        this.appBody.classname = '';
+    }
+    return this;
+});
+
 // prevent default behavior from changing page on dropped file
 window.ondragover = function(e) { e.preventDefault(); return false };
 window.ondrop = function(e) { e.preventDefault(); return false };
 
-var appBody = document.getElementsByTagName('body')[0];
-appBody.ondragenter = function (e) {
+UI.appBody.ondragenter = function (e) {
     e.preventDefault();
     this.classList.add('over');
 }
-appBody.ondragover = function (e) {
+UI.appBody.ondragover = function (e) {
     e.preventDefault();
-    this.className = 'dragging';
+    //console.log(UI);
+    UI.onFileDrag();
 };
-appBody.ondragleave = function (e) {
+UI.appBody.ondragleave = function (e) {
     e.preventDefault();
     this.classList.remove('over');
-    console.log('leave', e.target)
+    //console.log('leave', e.target)
     if (e.target.className && exceptions.indexOf(e.target.className) === -1) {
-        console.log('MIFASZ?', e.target.className)
-        this.className = '';
+        //console.log('MIFASZ?', e.target.className)
+        UI.onFileDrop();
     }
 };
-appBody.ondrop = function (e) {
+UI.appBody.ondrop = function (e) {
     e.preventDefault();
     var length = e.dataTransfer.files.length;
     for (var i = 0; i < length; i++) {
         var file = e.dataTransfer.files[i];
-        console.log('Download sub:', file);
+        //console.log('Download sub for:', file);
         // TODO addToQueue
-        downloadSubtitle(file.name, file.path, 'hun');
+        //downloadSubtitle(file.name, file.path, 'hun');
+        addToQueue(file);
     }
     this.className = '';
     return false;
 };
+
+var DogTitle = {
+    name: 'alma',
+    itemList: [],
+    state: 0,
+    getLastItem: function () {
+        var length = this.itemList.length;
+        return this.itemList[length-1];
+    }
+};
+var O = require('observed')
+var DogTitleObserver = O(DogTitle);
+DogTitleObserver.on('change itemList.length', function (event) {
+    DogTitle.state = event.value; // update the current state
+    showQueue();
+    console.log('onChange', event);
+    var list = document.getElementById('list');
+    var row = document.createElement('li');
+    console.log('He?', DogTitle.getLastItem().name);
+    row.innerHTML = '<span>' + DogTitle.getLastItem().name + '</span><i class="material-icons">queue</i>'
+    list.appendChild(row);
+    console.log('done');
+});
+
+var showQueue = function () {
+    document.getElementById('queue').style.display = 'inline-block';
+}
+var addToQueue = function (file) {
+    DogTitle.itemList.push(file);
+};
+
 
 var downloadSubtitle = function (filename, path, lang) {
 
