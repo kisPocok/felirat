@@ -1,14 +1,13 @@
 
-var gui = require('nw.gui')
-
-/* hide window while the app is loading
-onload = function() {
-    gui.Window.get().show();
-}
-*/
+var gui = require('nw.gui');
+var Q   = require('q');
+//var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
 var DogTitle = {};
+
+// Developer Console
+win.showDevTools();
 
 win.on('minimize', function() {
     console.log('Window is minimized');
@@ -23,8 +22,6 @@ if (process.platform == "darwin") {
 
 //localStorage.lang = 'hun'
 
-// Developer Console
-var win = gui.Window.get(); win.showDevTools();
 var exceptions = [
     'mdl-card__title',
     'mdl-card__supporting-text',
@@ -36,13 +33,30 @@ var exceptions = [
 ];
 
 var UI = new (function DogTitleUI () {
+    this.elements = {
+        'description': document.getElementById('description'),
+        'queue':       document.getElementById('queue'),
+        'list':        document.getElementById('list'),
+        'header':      document.getElementById('almafa')
+    };
+
     this.appBody = document.getElementsByTagName('body')[0];
     this.onFileDrag = function () {
         this.appBody.className = 'dragging';
     };
     this.onFileDrop = function () {
         this.appBody.classname = '';
-    }
+    };
+    this.showList = function () {
+        // TODO
+        this.elements.description.style.display = 'none'; // .hide()
+        this.elements.queue.style.display = 'block'; // .show()
+        this.elements.header.className = 'mdl-card__title  mdl-card--expand  small'; // addClass('small')
+    };
+    this.getListItem = function (fileName) {
+        return document.getElementsByClassName('list-item-' + fileName)[0];
+    };
+
     return this;
 });
 
@@ -73,19 +87,28 @@ UI.appBody.ondrop = function (e) {
     var length = e.dataTransfer.files.length;
     for (var i = 0; i < length; i++) {
         var file = e.dataTransfer.files[i];
-        //console.log('Download sub for:', file);
-        // TODO addToQueue
-        //downloadSubtitle(file.name, file.path, 'hun');
         addToQueue(file);
     }
     this.className = '';
     return false;
 };
 
+
+
+
 var DogTitle = {
     name: 'alma',
     itemList: [],
     state: 0,
+    getItemByFile: function (file) {
+        var i;
+        for (i in this.itemList) {
+            if (this.itemList[i].name === file.name) {
+                return this.itemList[i];
+            }
+        }
+        return null;
+    },
     getLastItem: function () {
         var length = this.itemList.length;
         return this.itemList[length-1];
@@ -94,22 +117,72 @@ var DogTitle = {
 var O = require('observed')
 var DogTitleObserver = O(DogTitle);
 DogTitleObserver.on('change itemList.length', function (event) {
+    // Ha a queue változik, generál hozzá html-t
     DogTitle.state = event.value; // update the current state
-    showQueue();
-    console.log('onChange', event);
-    var list = document.getElementById('list');
-    var row = document.createElement('li');
-    console.log('He?', DogTitle.getLastItem().name);
-    row.innerHTML = '<span>' + DogTitle.getLastItem().name + '</span><i class="material-icons">queue</i>'
-    list.appendChild(row);
-    console.log('done');
+    showQueue(); // TODO ez nem ide kell
+
+    var listItem = document.createElement('li');
+    listItem.className = 'list-item-' + DogTitle.getLastItem().name;
+    listItem.innerHTML = '<span>' + DogTitle.getLastItem().name + '</span><i class="material-icons  rotating">loop</i>'
+    UI.elements.list.appendChild(listItem);
 });
 
 var showQueue = function () {
-    document.getElementById('queue').style.display = 'inline-block';
-}
+    // TODO animálni kell itt
+    UI.elements.queue.style.display = 'inline-block';
+};
+
 var addToQueue = function (file) {
+    file.state = 'waiting';
     DogTitle.itemList.push(file);
+
+    // watch the current item
+    var itemWatcher = O(DogTitle.getLastItem());
+    itemWatcher.on('change', function (event) {
+        var row = UI.getListItem(event.object.name);
+        var icon = row.getElementsByTagName('i')[0];
+        icon.className = icon.className.replace(/rotating/, '');
+        icon.innerHTML = event.value;
+    });
+
+
+    downloadSubtitle(file.name, file.path, 'hun')
+        .then(function () {
+            console.log('kész?!');
+        })
+        .catch(function (e) {
+            console.log('hiba!!', e.stack);
+        })
+        .done(function () {
+            console.log('check state again');
+            checkQueueStatus(); // TODO ez nem ide kellene!
+        });
+};
+
+
+var subtitleFinished = function (newState) {
+    return function (file) {
+        var row = DogTitle.getItemByFile(file);
+        if (row && newState) {
+            row.state = newState;
+            return true;
+        }
+        return false;
+    };
+};
+var subtitleReady = subtitleFinished('done');
+var subtitleFailed = subtitleFinished('error_outline');
+
+
+var queueCheckingInProgress = false;
+var checkQueueStatus = function () {
+    if (queueCheckingInProgress) {
+        console.log('Checking already in progress... exit');
+        return false;
+    }
+    queueCheckingInProgress = true;
+    console.log('Checking...');
+    //console.log('DogTitle', DogTitle);
 };
 
 
@@ -129,18 +202,20 @@ var downloadSubtitle = function (filename, path, lang) {
         return;
     }
 
-    var Q            = require('q');
-    var Subtitle     = require('./resources/OpenSubtitles');
-    var subtitleApi  = new Subtitle();
-    var downloadSubtitle = require('./resources/SubtitleDownloader');
+    var Q           = require('q');
+    var Subtitle    = require('./resources/OpenSubtitles');
+    var subtitleApi = new Subtitle();
+    var getSubtitle = require('./resources/SubtitleDownloader');
 
     var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, filename, path, lang);
+
+    var deferred = Q.defer();
 
     Q.fcall(subtitleApi.connect())
         .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
         .then(subtitleApi.searchSubtitles(filename, 1, 1, 'hun', 1))
         .then(passSourceAndOutputParams)
-        .then(downloadSubtitle)
+        .then(getSubtitle)
         .then(function (downloadStatus) {
             var response = {
                 writable: downloadStatus.writable,
@@ -148,11 +223,16 @@ var downloadSubtitle = function (filename, path, lang) {
                 mode: downloadStatus.mode,
                 flags: downloadStatus.flags
             };
-            console.log('Download response:', response);
             return response;
+        })
+        .then(function (response) {
+            deferred.resolve();
         })
         .catch(function (error) {
             console.log('errors', error);
+            deferred.reject(error);
         })
         .done();
+
+    return deferred.promise;
 };

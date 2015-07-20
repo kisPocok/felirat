@@ -36,6 +36,7 @@ MovieHelper.srtFileName = function (fileName, lang) {
 
 MovieHelper.wrapperPassSourceAndOutputParams = function (subtitleApi, filename, path, lang) {
     return function passSourceAndOutputParams(searchResponse) {
+        console.log('searchResponse', searchResponse);
         var finalFileName = MovieHelper.removeFileExtension(filename);
         return {
             source: subtitleApi.getGzipUrl(searchResponse),

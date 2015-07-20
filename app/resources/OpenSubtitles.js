@@ -17,6 +17,7 @@ OpenSubtitles.prototype.connect = function (host, path, port) {
         port: port || this.port
     };
     return function () {
+        console.log('CONNECT');
         self.activeConnection = xmlrpc.createClient(connectParams);
         return self;
     };
@@ -87,6 +88,9 @@ OpenSubtitles.prototype.searchSubtitles = function (movieTitle, season, episode,
 };
 
 OpenSubtitles.prototype.getGzipUrl = function (searchResponse) {
+    if (!searchResponse || !searchResponse.data || !searchResponse.data[0]) {
+    throw new Error('Missing SubDownloadLink param');
+    }
     return searchResponse.data[0].SubDownloadLink;
 };
 
