@@ -17,7 +17,6 @@ OpenSubtitles.prototype.connect = function (host, path, port) {
         port: port || this.port
     };
     return function () {
-        console.log('CONNECT');
         self.activeConnection = xmlrpc.createClient(connectParams);
         return self;
     };
@@ -48,6 +47,67 @@ OpenSubtitles.prototype.logIn = function (username, password, userAgent) {
     };
 };
 
+/**
+ * This is the base search method. Do not call it directly!
+ *
+ * @param searchParams
+ * @returns {Function}
+ */
+var OpenSubtitlesSearchByParams = function SearchSubtitles(searchParams, limit) {
+    return function ExecuteSearchSubtitles(self) {
+        if (!self.activeConnection) {
+            throw new Error('No connection!');
+        }
+        if (!self.token) {
+            throw new Error('Missing token!');
+        }
+
+        var params = [
+            self.token,
+            searchParams,
+            {
+                limit: limit || 1
+            }
+        ];
+
+        var deferred = Q.defer();
+        self.activeConnection.methodCall('SearchSubtitles', params, function (error, response) {
+            console.log('response', response);
+            if (response.data === false) {
+                return deferred.reject(new Error('No subtitle found!'));
+            }
+
+            if (error) {
+                return deferred.reject(error);
+            }
+
+            return deferred.resolve(response);
+        });
+        return deferred.promise;
+    };
+}
+
+OpenSubtitles.prototype.searchSubtitlesByFileName = function (fileName, lang) {
+    var movieParams = [{
+        tag: fileName,
+        sublanguageid: lang || 'eng'
+    }];
+    console.log('movieParams', movieParams);
+    return OpenSubtitlesSearchByParams(movieParams);
+};
+
+OpenSubtitles.prototype.searchSubtitles = function (movieTitle, season, episode, lang, limit) {
+    var movieParams = [{
+        query: movieTitle,
+        sublanguageid: lang || 'eng'
+    }];
+    if (season) { movieParams.season = parseInt(season); }
+    if (episode) { movieParams.episode = parseInt(episode); }
+
+    return OpenSubtitlesSearchByParams(movieParams, limit);
+};
+
+/*
 OpenSubtitles.prototype.searchSubtitles = function (movieTitle, season, episode, lang, limit) {
     var movieParams = {
         query: movieTitle,
@@ -58,10 +118,10 @@ OpenSubtitles.prototype.searchSubtitles = function (movieTitle, season, episode,
 
     return function ExecuteSearchSubtitles(self) {
         if (!self.activeConnection) {
-            throw 'No connection!';
+            throw new Error('No connection!');
         }
         if (!self.token) {
-            throw 'Missing token!';
+            throw new Error('Missing token!');
         }
 
         var params = [
@@ -72,20 +132,24 @@ OpenSubtitles.prototype.searchSubtitles = function (movieTitle, season, episode,
             }
         ];
 
+        console.log('params', params);
         var deferred = Q.defer();
         self.activeConnection.methodCall('SearchSubtitles', params, function (error, response) {
-            if (error) {
-                //console.log('SearchSubtitles error', error);
-                deferred.reject(error);
-            } else {
-                //console.log('SearchSubtitles response', response);
-                deferred.resolve(response);
+            if (response.data === false) {
+                return deferred.reject(new Error('No subtitle found!'));
             }
+
+            if (error) {
+                return deferred.reject(error);
+            }
+
+            return deferred.resolve(response);
         });
         return deferred.promise;
     };
 
 };
+*/
 
 OpenSubtitles.prototype.getGzipUrl = function (searchResponse) {
     if (!searchResponse || !searchResponse.data || !searchResponse.data[0]) {

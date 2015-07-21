@@ -1,6 +1,7 @@
 
 var gui = require('nw.gui');
 var Q   = require('q');
+var Movie = require('./resources/Movie');
 //var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
@@ -145,17 +146,17 @@ var addToQueue = function (file) {
         icon.innerHTML = event.value;
     });
 
+    var movie = new Movie(file.name, file.path).interpret();
 
     downloadSubtitle(file.name, file.path, 'hun')
-        .then(function () {
-            console.log('kész?!');
+        .then(function (response) {
+            console.log('kész', subtitleReady(file));
         })
         .catch(function (e) {
-            console.log('hiba!!', e.stack);
+            console.log('hiba!!', subtitleFailed(file), e.stack);
         })
         .done(function () {
-            console.log('check state again');
-            checkQueueStatus(); // TODO ez nem ide kellene!
+            //checkQueueStatus(); // TODO ez nem ide kellene!
         });
 };
 
@@ -176,6 +177,7 @@ var subtitleFailed = subtitleFinished('error_outline');
 
 var queueCheckingInProgress = false;
 var checkQueueStatus = function () {
+    console.log('check state again');
     if (queueCheckingInProgress) {
         console.log('Checking already in progress... exit');
         return false;
@@ -207,13 +209,13 @@ var downloadSubtitle = function (filename, path, lang) {
     var subtitleApi = new Subtitle();
     var getSubtitle = require('./resources/SubtitleDownloader');
 
-    var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, filename, path, lang);
-
     var deferred = Q.defer();
+    var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, filename, path, lang);
 
     Q.fcall(subtitleApi.connect())
         .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-        .then(subtitleApi.searchSubtitles(filename, 1, 1, 'hun', 1))
+        //.then(subtitleApi.searchSubtitlesByFileName(filename, 'hun'))
+        .then(subtitleApi.searchSubtitles(MovieHelper.removeFileExtension(filename), 1, 1, 'hun', 1))
         .then(passSourceAndOutputParams)
         .then(getSubtitle)
         .then(function (downloadStatus) {
@@ -225,13 +227,8 @@ var downloadSubtitle = function (filename, path, lang) {
             };
             return response;
         })
-        .then(function (response) {
-            deferred.resolve();
-        })
-        .catch(function (error) {
-            console.log('errors', error);
-            deferred.reject(error);
-        })
+        .then(deferred.resolve)
+        .catch(deferred.reject)
         .done();
 
     return deferred.promise;
