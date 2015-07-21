@@ -3,10 +3,12 @@ var sceneRelease     = require('scene-release');
 var parseTorrentName = require('parse-torrent-name');
 var MovieHelper      = require('./MovieHelper');
 
-var Movie = function Movie(fileName, filePath) {
+var Movie = function Movie(fileName, filePath, lang) {
     this.fileName = fileName;
     this.fileNameWithoutExtension = MovieHelper.removeFileExtension(this.fileName);
     this.path = filePath ? filePath : null;
+
+    this.subtitleLang = lang || 'eng';
 
     this.title = movieTitle(this.fileName);
     this.season = null;
@@ -18,6 +20,26 @@ var Movie = function Movie(fileName, filePath) {
     this.quality = null;
     this.resoultion = null;
     this.year = null;
+
+
+    this.hash = null;
+    this.sizeInBytes = null;
+
+    this.calculateFileSize = function CalculateFileSize() {
+        var stats = require('fs').statSync(this.path);
+        this.sizeInBytes = stats["size"];
+        return this;
+    }
+
+    this.calculateHash = function CalculateHash() {
+        var opensubtitles = require("opensubtitles-client");
+        var self = this;
+        return opensubtitles.hash.getHash(this.path)
+            .then(function (hash) {
+                self.hash = hash;
+                return self;
+            });
+    }
 
     this.interpret = function InterpretMovieDetails() {
         var ptn = parseTorrentName(this.fileNameWithoutExtension);

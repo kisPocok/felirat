@@ -2,6 +2,7 @@
 var gui = require('nw.gui');
 var Q   = require('q');
 var Movie = require('./resources/Movie');
+var Subtitle = require('./resources/Subtitle');
 //var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
@@ -146,14 +147,21 @@ var addToQueue = function (file) {
         icon.innerHTML = event.value;
     });
 
-    var movie = new Movie(file.name, file.path).interpret();
-
-    downloadSubtitle(file.name, file.path, 'hun')
+    new Movie(file.name, file.path)
+        .interpret()
+        .calculateFileSize()
+        .calculateHash()
+        .then(function (movie) {
+            var subtitle = new Subtitle(movie, 'hun');
+            return subtitle;
+        })
+        .then(downloadSubtitle)
         .then(function (response) {
             console.log('kész', subtitleReady(file));
         })
         .catch(function (e) {
-            console.log('hiba!!', subtitleFailed(file), e.stack);
+            subtitleFailed(file);
+            console.error(e.stack);
         })
         .done(function () {
             //checkQueueStatus(); // TODO ez nem ide kellene!
@@ -188,18 +196,20 @@ var checkQueueStatus = function () {
 };
 
 
-var downloadSubtitle = function (filename, path, lang) {
+var downloadSubtitle = function DownloadSubtitle(Subtitle) {
+
+    var Movie = Subtitle.for;
+    var lang = Subtitle.lang;
 
     // TODO ha fájlnévből nem megy mappa nevéből esetleg?
-    // TODO filename végén kiterjesztést le kell szedni! (mkv/mp4/mi más?)
 
     var MovieHelper = require('./resources/MovieHelper');
-    if (MovieHelper.isSubtitle(filename) === true) {
+    if (MovieHelper.isSubtitle(Movie.fileName) === true) {
         console.log('Huh?'); // TODO feliratot nem töltünk le újra :)
         return;
     }
 
-    if (MovieHelper.isDir(path) === true) {
+    if (MovieHelper.isDir(Movie.path) === true) {
         console.log('Directory not supported yet!'); // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
         return;
     }
@@ -210,12 +220,40 @@ var downloadSubtitle = function (filename, path, lang) {
     var getSubtitle = require('./resources/SubtitleDownloader');
 
     var deferred = Q.defer();
-    var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, filename, path, lang);
+    var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, Movie.fileName, Movie.path, lang);
 
-    Q.fcall(subtitleApi.connect())
+    Q.longStackSupport = true;
+    Q.try(subtitleApi.connect())
         .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-        //.then(subtitleApi.searchSubtitlesByFileName(filename, 'hun'))
-        .then(subtitleApi.searchSubtitles(MovieHelper.removeFileExtension(filename), 1, 1, 'hun', 1))
+        .then(function (connection) {
+            return Q.any([
+                subtitleApi.searchSubtitlesByHash(Movie.hash, Movie.sizeInBytes, lang)(connection),
+                subtitleApi.searchSubtitles(Movie.fileNameWithoutExtension, Movie.season, Movie.episode, lang, 1)(connection),
+                subtitleApi.searchSubtitlesByFileName(Movie.fileName, lang)(connection)
+            ]);
+        })
+        .then(function AnyPromiseFulfilled(response) {
+            console.log('WTF?', response);
+            if (response.data === false) {
+                //return Q(subtitleApi.searchSubtitles(Movie.fileNameWithoutExtension, Movie.season, Movie.episode, lang, 1));
+            }
+            return response;
+        }, function AllPromiseRejected() {
+            console.log('EACH PROMISE ARE DEAD');
+        })
+        /*
+        .then(function (response) {
+            if (response.data === false) {
+                console.log('FAIL :(');
+            }
+            return response;
+        })*/
+        /*
+        .allSettled()
+        .settled(function (a,b) {
+            console.log(a,b);
+        })
+        */
         .then(passSourceAndOutputParams)
         .then(getSubtitle)
         .then(function (downloadStatus) {
