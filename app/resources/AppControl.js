@@ -89,7 +89,13 @@ UI.appBody.ondrop = function (e) {
     var length = e.dataTransfer.files.length;
     for (var i = 0; i < length; i++) {
         var file = e.dataTransfer.files[i];
-        addToQueue(file);
+
+        // TODO ezt itt szebben kellene...
+        addToQueue({
+            name:  file.name,
+            path:  file.path,
+            state: 'loading'
+        });
     }
     this.className = '';
     return false;
@@ -102,14 +108,14 @@ var DogTitle = {
     name: 'alma',
     itemList: [],
     state: 0,
-    getItemByFile: function (file) {
-        var i;
+    getItemsByFile: function (file) {
+        var i, items = [];
         for (i in this.itemList) {
             if (this.itemList[i].name === file.name) {
-                return this.itemList[i];
+                items.push(this.itemList[i]);
             }
         }
-        return null;
+        return items;
     },
     getLastItem: function () {
         var length = this.itemList.length;
@@ -147,42 +153,59 @@ var addToQueue = function (file) {
         icon.innerHTML = event.value;
     });
 
-    new Movie(file.name, file.path)
+    var Q = require('q');
+    var MovieHelper = require('./resources/MovieHelper');
+    var downloadSubtitle = require('./resources/SubtitleDownloader');
+
+    var lang = 'hun' // TODO
+    var movie = new Movie(file.name, file.path);
+    var searchResponseTransform = MovieHelper.wrapperPassSourceAndOutputParams(movie, lang);
+
+    movie
         .interpret()
         .calculateFileSize()
         .calculateHash()
-        .then(function (movie) {
-            var subtitle = new Subtitle(movie, 'hun');
-            return subtitle;
+        .then(function CreateSubtitleRequest(movie) {
+            return new Subtitle(movie, lang);
         })
+        .then(searchSubtitle)
+        .then(searchResponseTransform)
+        //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
         .then(downloadSubtitle)
-        .then(function (response) {
-            console.log('kész', subtitleReady(file));
+        .then(function OutPut(downloadResult) {
+            var response = {
+                writable: downloadResult.writable,
+                path:     downloadResult.path,
+                mode:     downloadResult.mode,
+                flags:    downloadResult.flags
+            };
+            return response;
         })
-        .catch(function (e) {
+        .then(function (output) {
+            console.log('output:', output)
+            subtitleReady(file);
+        })
+        .catch(function (error) {
             subtitleFailed(file);
-            console.error(e.stack);
+            console.error(error);
         })
-        .done(function () {
-            //checkQueueStatus(); // TODO ez nem ide kellene!
-        });
+        .done();
 };
 
 
 var subtitleFinished = function (newState) {
     return function (file) {
-        var row = DogTitle.getItemByFile(file);
-        if (row && newState) {
-            row.state = newState;
-            return true;
-        }
-        return false;
+        //console.debug('State:', newState, file)
+        var rows = DogTitle.getItemsByFile(file);
+        rows.map(function (self) {
+            self.state = newState;
+        });
     };
 };
 var subtitleReady = subtitleFinished('done');
 var subtitleFailed = subtitleFinished('error_outline');
 
-
+/*
 var queueCheckingInProgress = false;
 var checkQueueStatus = function () {
     console.log('check state again');
@@ -194,10 +217,18 @@ var checkQueueStatus = function () {
     console.log('Checking...');
     //console.log('DogTitle', DogTitle);
 };
+*/
 
+var getConnection = function () {
+    var Q           = require('q');
+    var Subtitle    = require('./resources/OpenSubtitles');
+    var subtitleApi = new Subtitle();
 
-var downloadSubtitle = function DownloadSubtitle(Subtitle) {
+    return Q.try(subtitleApi.connect())
+        .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'));
+};
 
+var searchSubtitle = function GetDownloadUrl(Subtitle) {
     var Movie = Subtitle.for;
     var lang = Subtitle.lang;
 
@@ -217,55 +248,25 @@ var downloadSubtitle = function DownloadSubtitle(Subtitle) {
     var Q           = require('q');
     var Subtitle    = require('./resources/OpenSubtitles');
     var subtitleApi = new Subtitle();
-    var getSubtitle = require('./resources/SubtitleDownloader');
-
     var deferred = Q.defer();
-    var passSourceAndOutputParams = MovieHelper.wrapperPassSourceAndOutputParams(subtitleApi, Movie.fileName, Movie.path, lang);
 
-    Q.longStackSupport = true;
-    Q.try(subtitleApi.connect())
-        .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-        .then(function (connection) {
-            return Q.any([
-                subtitleApi.searchSubtitlesByHash(Movie.hash, Movie.sizeInBytes, lang)(connection),
-                subtitleApi.searchSubtitles(Movie.fileNameWithoutExtension, Movie.season, Movie.episode, lang, 1)(connection),
-                subtitleApi.searchSubtitlesByFileName(Movie.fileName, lang)(connection)
-            ]);
-        })
-        .then(function AnyPromiseFulfilled(response) {
-            console.log('WTF?', response);
-            if (response.data === false) {
-                //return Q(subtitleApi.searchSubtitles(Movie.fileNameWithoutExtension, Movie.season, Movie.episode, lang, 1));
-            }
-            return response;
-        }, function AllPromiseRejected() {
-            console.log('EACH PROMISE ARE DEAD');
-        })
-        /*
-        .then(function (response) {
-            if (response.data === false) {
-                console.log('FAIL :(');
-            }
-            return response;
-        })*/
-        /*
-        .allSettled()
-        .settled(function (a,b) {
-            console.log(a,b);
-        })
-        */
-        .then(passSourceAndOutputParams)
-        .then(getSubtitle)
-        .then(function (downloadStatus) {
-            var response = {
-                writable: downloadStatus.writable,
-                path: downloadStatus.path,
-                mode: downloadStatus.mode,
-                flags: downloadStatus.flags
-            };
-            return response;
-        })
+    Q
+        // Search by hash
+        .try(getConnection)
+        .then(subtitleApi.searchSubtitlesByHash(Movie.hash+'aa', Movie.sizeInBytes, lang))
         .then(deferred.resolve)
+
+        // Search by title
+        .catch(getConnection)
+        .then(subtitleApi.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
+        .then(deferred.resolve)
+
+        // Search by file name
+        .catch(getConnection)
+        .then(subtitleApi.searchSubtitlesByFileName(Movie.fileName, lang))
+        .then(deferred.resolve)
+
+        // End it
         .catch(deferred.reject)
         .done();
 
