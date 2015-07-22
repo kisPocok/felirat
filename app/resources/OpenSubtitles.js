@@ -26,19 +26,21 @@ OpenSubtitles.prototype.logIn = function (username, password, userAgent) {
     var params = [username, password, 'eng', userAgent];
 
     return function (self) {
+        if (!self) {
+            throw new Error('Missing connection! #2');
+        }
         if (!self.activeConnection) {
-            throw 'No connection!';
+            throw new Error('No connection!');
         }
 
         var deferred = Q.defer();
         self.activeConnection.methodCall('LogIn', params, function (error, response) {
             if (error) {
-                //console.log('Login error');
-                //console.log('Login error', error);
+                //console.error('Login error:', error);
                 deferred.reject(error);
             } else {
                 //console.log('Login responsed');
-                //console.log('Login response', response);
+                //console.debug('Login response:', response);
                 self.token = response.token;
                 deferred.resolve(self);
             }
@@ -55,6 +57,9 @@ OpenSubtitles.prototype.logIn = function (username, password, userAgent) {
  */
 var OpenSubtitlesSearchByParams = function SearchSubtitles(searchParams, limit) {
     return function ExecuteSearchSubtitles(self) {
+        if (!self) {
+            throw new Error('Missing connection! #1');
+        }
         if (!self.activeConnection) {
             throw new Error('No connection!');
         }

@@ -33,6 +33,7 @@
     "title": "DogTitle",
     "transparent": false,
     "frame": true,
+    "fullscreen": false,
     "toolbar": false,
     "show": true,
     "position": "center",

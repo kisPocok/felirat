@@ -119,3 +119,10 @@ body.dragging #queue {
 .mdl-card__actions {
   flex-shrink: 0;
 }
+.mdl-spinner--small {
+  width: 10px;
+  height: 10px;
+}
+.mdl-spinner--small .mdl-spinner__circle {
+  border-width: 1px;
+}

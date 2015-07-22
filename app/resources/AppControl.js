@@ -15,13 +15,6 @@ win.on('minimize', function() {
     console.log('Window is minimized');
 });
 
-// Extend application menu for Mac OS
-if (process.platform == "darwin") {
-    var menu = new gui.Menu({type: "menubar"});
-    menu.createMacBuiltin && menu.createMacBuiltin(window.document.title);
-    win.menu = menu;
-}
-
 //localStorage.lang = 'hun'
 
 var exceptions = [
@@ -129,6 +122,7 @@ DogTitleObserver.on('change itemList.length', function (event) {
     DogTitle.state = event.value; // update the current state
     showQueue(); // TODO ez nem ide kell
 
+    // TODO var spin = '<p class="mdl-spinner mdl-spinner--small mdl-js-spinner is-active"></p>';
     var listItem = document.createElement('li');
     listItem.className = 'list-item-' + DogTitle.getLastItem().name;
     listItem.innerHTML = '<span>' + DogTitle.getLastItem().name + '</span><i class="material-icons  rotating">loop</i>'
@@ -153,7 +147,6 @@ var addToQueue = function (file) {
         icon.innerHTML = event.value;
     });
 
-    var Q = require('q');
     var MovieHelper = require('./resources/MovieHelper');
     var downloadSubtitle = require('./resources/SubtitleDownloader');
 
@@ -165,12 +158,13 @@ var addToQueue = function (file) {
         .interpret()
         .calculateFileSize()
         .calculateHash()
+        .then(validateMovie)
         .then(function CreateSubtitleRequest(movie) {
             return new Subtitle(movie, lang);
         })
         .then(searchSubtitle)
-        .then(searchResponseTransform)
         //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
+        .then(searchResponseTransform)
         .then(downloadSubtitle)
         .then(function OutPut(downloadResult) {
             var response = {
@@ -190,6 +184,27 @@ var addToQueue = function (file) {
             console.error(error);
         })
         .done();
+};
+
+var validateMovie = function ValidateMovie(Movie) {
+    var MovieHelper = require('./resources/MovieHelper');
+    if (MovieHelper.isSubtitle(Movie.fileName) === true) {
+        // TODO feliratot nem töltünk le újra :)
+        throw new Error('Huh?');
+    }
+
+
+    if (MovieHelper.isDir(Movie.path) === true) {
+        // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
+        throw new Error('Directory not supported yet!');
+    }
+
+    /* // TODO ez azért nem kell, mert hash nélkül is mennie kell a keresésnek
+    if (movie.hash === '0000000000000000') {
+        throw new Error('Wrong hash!')
+    }
+     */
+    return Movie;
 };
 
 
@@ -219,56 +234,59 @@ var checkQueueStatus = function () {
 };
 */
 
-var getConnection = function () {
-    var Q           = require('q');
-    var Subtitle    = require('./resources/OpenSubtitles');
-    var subtitleApi = new Subtitle();
+var getConnection = function Connect() {
+    var OpenSubtitleApi = require('./resources/OpenSubtitles');
+    var API = new OpenSubtitleApi();
 
-    return Q.try(subtitleApi.connect())
-        .then(subtitleApi.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'));
+    var ConnectionError = function (error) {
+        console.error('Connection Error:', error);
+    };
+
+    var AuthError = function (error) {
+        console.error('Auth Error:', error);
+    };
+
+    return function Connect() {
+        return Q.try(API.connect())
+            .catch(ConnectionError)
+            .then(API.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
+            .catch(AuthError);
+    };
 };
 
-var searchSubtitle = function GetDownloadUrl(Subtitle) {
+var searchSubtitle = function SearchSub(Subtitle) {
     var Movie = Subtitle.for;
     var lang = Subtitle.lang;
 
     // TODO ha fájlnévből nem megy mappa nevéből esetleg?
 
-    var MovieHelper = require('./resources/MovieHelper');
-    if (MovieHelper.isSubtitle(Movie.fileName) === true) {
-        console.log('Huh?'); // TODO feliratot nem töltünk le újra :)
-        return;
-    }
-
-    if (MovieHelper.isDir(Movie.path) === true) {
-        console.log('Directory not supported yet!'); // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
-        return;
-    }
-
-    var Q           = require('q');
-    var Subtitle    = require('./resources/OpenSubtitles');
-    var subtitleApi = new Subtitle();
+    var OpenSubtitleApi = require('./resources/OpenSubtitles');
+    var API = new OpenSubtitleApi();
+    var connectToAPI = getConnection();
     var deferred = Q.defer();
 
     Q
         // Search by hash
-        .try(getConnection)
-        .then(subtitleApi.searchSubtitlesByHash(Movie.hash+'aa', Movie.sizeInBytes, lang))
+        .try(connectToAPI)
+        .then(function Debug(r) { console.debug('debug in queue:', r); return r; })
+        .then(API.searchSubtitlesByHash(Movie.hash+'aa', Movie.sizeInBytes, lang))
         .then(deferred.resolve)
 
         // Search by title
-        .catch(getConnection)
-        .then(subtitleApi.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
+        .catch(connectToAPI)
+        .then(API.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
         .then(deferred.resolve)
 
         // Search by file name
-        .catch(getConnection)
-        .then(subtitleApi.searchSubtitlesByFileName(Movie.fileName, lang))
+        .catch(connectToAPI)
+        .then(API.searchSubtitlesByFileName(Movie.fileName, lang))
         .then(deferred.resolve)
 
         // End it
         .catch(deferred.reject)
-        .done();
+        .done(function () {
+            // TODO drop the connection / logout
+        });
 
     return deferred.promise;
 };
