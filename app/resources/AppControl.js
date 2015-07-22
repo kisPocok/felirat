@@ -2,7 +2,7 @@
 var gui = require('nw.gui');
 var Q   = require('q');
 var Movie = require('./resources/Movie');
-var Subtitle = require('./resources/Subtitle');
+var SubtitleRequest = require('./resources/SubtitleRequest');
 //var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
@@ -160,18 +160,18 @@ var addToQueue = function AddSubtitleToQueue(file) {
         .calculateHash()
         .then(validateMovie)
         .then(function CreateSubtitleRequest(movie) {
-            return new Subtitle(movie, lang);
+            return new SubtitleRequest(movie, lang);
         })
         .then(searchSubtitle)
         //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
         .then(searchResponseTransform)
         .then(downloadSubtitle)
-        .then(function OutPut(downloadResult) {
+        .then(function OutPut(result) {
             var response = {
-                writable: downloadResult.writable,
-                path:     downloadResult.path,
-                mode:     downloadResult.mode,
-                flags:    downloadResult.flags
+                writable: result.writable,
+                path:     result.path,
+                mode:     result.mode,
+                flags:    result.flags
             };
             return response;
         })
@@ -254,9 +254,9 @@ var getConnection = function Connect() {
     };
 };
 
-var searchSubtitle = function SearchSub(Subtitle) {
-    var Movie = Subtitle.for;
-    var lang = Subtitle.lang;
+var searchSubtitle = function SearchSub(SubtitleRequest) {
+    var Movie = SubtitleRequest.for;
+    var lang = SubtitleRequest.lang;
 
     // TODO ha fájlnévből nem megy mappa nevéből esetleg?
 
