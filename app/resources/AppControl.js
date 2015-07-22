@@ -134,7 +134,7 @@ var showQueue = function () {
     UI.elements.queue.style.display = 'inline-block';
 };
 
-var addToQueue = function (file) {
+var addToQueue = function AddSubtitleToQueue(file) {
     file.state = 'waiting';
     DogTitle.itemList.push(file);
 
@@ -262,27 +262,27 @@ var searchSubtitle = function SearchSub(Subtitle) {
 
     var OpenSubtitleApi = require('./resources/OpenSubtitles');
     var API = new OpenSubtitleApi();
-    var connectToAPI = getConnection();
+    var createConnection = getConnection();
     var deferred = Q.defer();
 
     Q
         // Search by hash
-        .try(connectToAPI)
-        .then(function Debug(r) { console.debug('debug in queue:', r); return r; })
+        .try(createConnection)
         .then(API.searchSubtitlesByHash(Movie.hash+'aa', Movie.sizeInBytes, lang))
         .then(deferred.resolve)
 
         // Search by title
-        .catch(connectToAPI)
+        .catch(createConnection)
         .then(API.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
         .then(deferred.resolve)
 
         // Search by file name
-        .catch(connectToAPI)
+        .catch(createConnection)
         .then(API.searchSubtitlesByFileName(Movie.fileName, lang))
         .then(deferred.resolve)
 
         // End it
+        //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
         .catch(deferred.reject)
         .done(function () {
             // TODO drop the connection / logout
