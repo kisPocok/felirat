@@ -264,11 +264,13 @@ var getConnection = function Connect() {
         console.error('Auth Error:', error);
     };
 
+    var connectionPromise = Q.try(API.connect())
+        .catch(ConnectionError)
+        .then(API.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
+        .catch(AuthError);;
+
     return function Connect() {
-        return Q.try(API.connect())
-            .catch(ConnectionError)
-            .then(API.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-            .catch(AuthError);
+        return connectionPromise;
     };
 };
 
