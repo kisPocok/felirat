@@ -5,7 +5,6 @@ var O   = require('observed')
 var md5 = require('md5');
 var Movie = require('./resources/Movie');
 var MovieFile = require('./resources/MovieFile');
-var SubtitleRequest = require('./resources/SubtitleRequest');
 //var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
@@ -173,7 +172,8 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
     var subtitleReady  = subtitleFinished('done');
     var subtitleFailed = subtitleFinished('error_outline');
 
-    var MovieHelper = require('./resources/MovieHelper');
+    var MovieHelper      = require('./resources/MovieHelper');
+    var SubtitleRequest  = require('./resources/SubtitleRequest');
     var downloadSubtitle = require('./resources/SubtitleDownloader');
 
     var createSubtitleRequest = function CreateSubtitleRequest(lang) {
