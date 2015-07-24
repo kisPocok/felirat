@@ -199,7 +199,7 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
         })
         .catch(function (error) {
             subtitleFailed(MovieFile);
-            console.error(error);
+            console.error(error.message);
         })
         .done();
 };
@@ -252,7 +252,7 @@ var checkQueueStatus = function () {
 };
 */
 
-var getConnection = function Connect() {
+var createConnection = function Connect() {
     var OpenSubtitleApi = require('./resources/OpenSubtitles');
     var API = new OpenSubtitleApi();
 
@@ -261,7 +261,7 @@ var getConnection = function Connect() {
     };
 
     var AuthError = function (error) {
-        console.error('Auth Error:', error);
+        console.error('Auth Error:', error.code);
     };
 
     var connectionPromise = Q.try(API.connect())
@@ -269,7 +269,7 @@ var getConnection = function Connect() {
         .then(API.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
         .catch(AuthError);;
 
-    return function Connect() {
+    return function getConnection() {
         return connectionPromise;
     };
 };
@@ -282,22 +282,22 @@ var searchSubtitle = function SearchSub(SubtitleRequest) {
 
     var OpenSubtitleApi = require('./resources/OpenSubtitles');
     var API = new OpenSubtitleApi();
-    var createConnection = getConnection();
+    var apiConnection = createConnection();
     var deferred = Q.defer();
 
     Q
         // Search by hash
-        .try(createConnection)
+        .try(apiConnection)
         .then(API.searchSubtitlesByHash(Movie.hash+'aa', Movie.sizeInBytes, lang))
         .then(deferred.resolve)
 
         // Search by title
-        .catch(createConnection)
+        .catch(apiConnection)
         .then(API.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
         .then(deferred.resolve)
 
         // Search by file name
-        .catch(createConnection)
+        .catch(apiConnection)
         .then(API.searchSubtitlesByFileName(Movie.fileName, lang))
         .then(deferred.resolve)
 
