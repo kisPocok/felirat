@@ -1,7 +1,10 @@
 
 var gui = require('nw.gui');
 var Q   = require('q');
+var O   = require('observed')
+var md5 = require('md5');
 var Movie = require('./resources/Movie');
+var MovieFile = require('./resources/MovieFile');
 var SubtitleRequest = require('./resources/SubtitleRequest');
 //var preloader = require('./resources/Preloader');
 
@@ -48,8 +51,27 @@ var UI = new (function DogTitleUI () {
         this.elements.queue.style.display = 'block'; // .show()
         this.elements.header.className = 'mdl-card__title  mdl-card--expand  small'; // addClass('small')
     };
+    this.showQueue = function () {
+        UI.elements.queue.style.display = 'inline-block';
+    };
     this.getListItem = function (fileName) {
         return document.getElementsByClassName('list-item-' + fileName)[0];
+    };
+    this.createListItem = function CreateItemThenReturnsHTMLQuery(MovieFile) {
+        var name = MovieFile.fileName;
+        var hash = 'dt' + md5('movie' + name);
+        var className = 'list-item-' + hash;
+        var length = UI.elements.list.getElementsByClassName(className).length;
+        var id = hash + '-' + length;
+        // TODO var spin = '<p class="mdl-spinner mdl-spinner--small mdl-js-spinner is-active"></p>';
+        var spin = '<i class="material-icons  rotating">loop</i>';
+
+        var item = document.createElement('li');
+        item.className = className;
+        item.id = id;
+        item.innerHTML = '<span>' + name + '</span>' + spin;
+        UI.elements.list.appendChild(item);
+        return '#' + item.id;
     };
 
     return this;
@@ -82,32 +104,24 @@ UI.appBody.ondrop = function (e) {
     var length = e.dataTransfer.files.length;
     for (var i = 0; i < length; i++) {
         var file = e.dataTransfer.files[i];
-
-        // TODO ezt itt szebben kellene...
-        addToQueue({
-            name:  file.name,
-            path:  file.path,
-            state: 'loading'
-        });
+        addToQueue(new MovieFile(file.name, file.path));
     }
     this.className = '';
     return false;
 };
 
-
-
-
 var DogTitle = {
     name: 'alma',
     itemList: [],
     state: 0,
-    getItemsByFile: function (file) {
+    getItemsByFile: function (MovieFile) {
         var i, items = [];
         for (i in this.itemList) {
-            if (this.itemList[i].name === file.name) {
+            if (this.itemList[i].fileName === MovieFile.fileName) {
                 items.push(this.itemList[i]);
             }
         }
+        //console.log(items);
         return items;
     },
     getLastItem: function () {
@@ -115,43 +129,47 @@ var DogTitle = {
         return this.itemList[length-1];
     }
 };
-var O = require('observed')
+/*
 var DogTitleObserver = O(DogTitle);
-DogTitleObserver.on('change itemList.length', function (event) {
-    // Ha a queue változik, generál hozzá html-t
-    DogTitle.state = event.value; // update the current state
-    showQueue(); // TODO ez nem ide kell
 
+// Ha a queue változik, generál hozzá html-t
+DogTitleObserver.on('change itemList.length', function (event) {
     // TODO var spin = '<p class="mdl-spinner mdl-spinner--small mdl-js-spinner is-active"></p>';
     var listItem = document.createElement('li');
-    listItem.className = 'list-item-' + DogTitle.getLastItem().name;
-    listItem.innerHTML = '<span>' + DogTitle.getLastItem().name + '</span><i class="material-icons  rotating">loop</i>'
+    listItem.className = 'list-item-' + DogTitle.getLastItem().fileName;
+    listItem.innerHTML = '<span>' + DogTitle.getLastItem().fileName + '</span><i class="material-icons  rotating">loop</i>'
     UI.elements.list.appendChild(listItem);
+
+    // assign dom element to object
+    var MovieFile = event.object;
+    MovieFile.htmlElement = listItem;
 });
+*/
 
-var showQueue = function () {
-    // TODO animálni kell itt
-    UI.elements.queue.style.display = 'inline-block';
-};
+var addToQueue = function AddSubtitleToQueue(MovieFile) {
+    MovieFile.state = 'waiting';
+    MovieFile.htmlQuery = UI.createListItem(MovieFile);
+    var index = DogTitle.itemList.push(MovieFile);
+    var itemObserver = O(DogTitle.itemList[--index]);
 
-var addToQueue = function AddSubtitleToQueue(file) {
-    file.state = 'waiting';
-    DogTitle.itemList.push(file);
+    itemObserver.on('change', function (event) {
+        var MovieFile = event.object;
+        var status = event.value;
 
-    // watch the current item
-    var itemWatcher = O(DogTitle.getLastItem());
-    itemWatcher.on('change', function (event) {
-        var row = UI.getListItem(event.object.name);
-        var icon = row.getElementsByTagName('i')[0];
-        icon.className = icon.className.replace(/rotating/, '');
-        icon.innerHTML = event.value;
+        var item = UI.elements.list.querySelector(MovieFile.htmlQuery);
+        var icon = item.getElementsByTagName('i')[0];
+        if (status !== 'waiting') {
+            icon.className = icon.className.replace(/rotating/, '');
+        }
+        icon.innerHTML = status;
     });
+
 
     var MovieHelper = require('./resources/MovieHelper');
     var downloadSubtitle = require('./resources/SubtitleDownloader');
 
     var lang = 'hun' // TODO
-    var movie = new Movie(file.name, file.path);
+    var movie = new Movie(MovieFile.fileName, MovieFile.path);
     var searchResponseTransform = MovieHelper.wrapperPassSourceAndOutputParams(movie, lang);
 
     movie
@@ -176,11 +194,11 @@ var addToQueue = function AddSubtitleToQueue(file) {
             return response;
         })
         .then(function (output) {
-            console.log('output:', output)
-            subtitleReady(file);
+            console.debug('output:', output)
+            subtitleReady(MovieFile);
         })
         .catch(function (error) {
-            subtitleFailed(file);
+            subtitleFailed(MovieFile);
             console.error(error);
         })
         .done();
@@ -209,9 +227,9 @@ var validateMovie = function ValidateMovie(Movie) {
 
 
 var subtitleFinished = function (newState) {
-    return function (file) {
+    return function (MovieFile) {
         //console.debug('State:', newState, file)
-        var rows = DogTitle.getItemsByFile(file);
+        var rows = DogTitle.getItemsByFile(MovieFile);
         rows.map(function (self) {
             self.state = newState;
         });
