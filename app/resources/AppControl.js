@@ -31,10 +31,10 @@ var exceptions = [
 
 var UI = new (function DogTitleUI () {
     this.elements = {
-        'description': document.getElementById('description'),
-        'queue':       document.getElementById('queue'),
-        'list':        document.getElementById('list'),
-        'header':      document.getElementById('almafa')
+        'header':      document.getElementById('section-header'),
+        'description': document.getElementById('section-description'),
+        'queue':       document.getElementById('section-queue'),
+        'list':        document.getElementById('list')
     };
 
     this.appBody = document.getElementsByTagName('body')[0];

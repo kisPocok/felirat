@@ -13,8 +13,8 @@ body {
 
 button { -webkit-app-region: no-drag; }
 
-body.dragging #description { margin-top: -70px; }
-#description {
+body.dragging #section-description { margin-top: -70px; }
+#section-description {
   pointer-events: none;
   transition: margin 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
   * { pointer-events: none; }
@@ -54,16 +54,6 @@ body.dragging #description { margin-top: -70px; }
     padding-right: 0;
   }
 }
-/* TODO UNUSED?
-.subtitle-icon {
-  font-size: 90px;
-  margin-top: 1px;
-  position: absolute;
-  right: 10px;
-  bottom: 0;
-}
-*/
-
 #logo {
   background-image: url(../images/porkolt160.jpg);
   background-size: 100% 100%;
@@ -74,7 +64,7 @@ body.dragging #description { margin-top: -70px; }
   overflow: hidden;
   margin-left: 5px;
 }
-#queue {
+#section-queue {
   overflow: scroll;
   transition: height 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
 }
@@ -84,6 +74,8 @@ body.dragging {
     //margin-top: -408px;
   }
 }
+#section-language { flex-shrink: 0; }
+
 #list {
   padding-left: 0;
   margin-top: 0;
@@ -91,39 +83,83 @@ body.dragging {
 
   li {
     list-style: none;
-    font-size: 12px;
+    font-size: 14px;
 
     i {
       float: right;
       text-align: right;
-      font-size: 18px;
+      font-size: 20px;
+      margin-top: 1px;
     }
     .movie-title {
-      width: -webkit-calc(100% - 10px);
+      width: -webkit-calc(100% - 32px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       display: inline-block;
     }
+    .mdl-js-spinner {
+        width: 16px;
+        height: 16px;
+        margin-bottom: 3px;
+    .mdl-spinner__circle {
+          border-width: 2px;
+        }
+    }
   }
 }
 @-webkit-keyframes rotating {
   from { -webkit-transform: rotate(360deg); }
-  to { -webkit-transform: rotate(0deg);
-  }
+  to { -webkit-transform: rotate(0deg); }
 }
-
 .rotating {
   -webkit-animation: rotating 2s linear infinite;
 }
 
-.mdl-card__actions {
-  flex-shrink: 0;
+/* ==========  Select Field Variables ========== */
+
+$color-black: "0,0,0";
+$select-background-color: transparent;
+$select-border-color: unquote("rgba(#{$color-black}, 0.06)") !default;
+$select-font-size: 16px;
+$select-color: unquote("rgba(#{$color-black}, 0.26)") !default;
+$select-padding: 4px;
+
+/* ==========  Select Field ========== */
+
+/* Style Select Field */
+select {
+  font-family: inherit;
+  background-color: transparent;
+  width: 100%;
+  padding: $select-padding 0;
+  font-size: $select-font-size;
+  color: $select-color;
+  border: none;
+  //border-bottom: 1px solid $select-border-color;
 }
-.movie-status {
-  width: 14px;
-  height: 14px;
-  .mdl-spinner__circle {
-    border-width: 2px;
+
+/* Remove focus */
+select:focus { outline: none; }
+
+/* Hide label */
+.mdl-selectfield label { display: none; }
+/* Use custom arrow */
+.mdl-selectfield select { appearance: none; }
+.mdl-selectfield {
+  position: relative;
+  &:after {
+    position: absolute;
+    top: 0.75em;
+    right: 0.5em;
+    /* Styling the down arrow */
+    width: 0;
+    height: 0;
+    padding: 0;
+    content: '';
+    border-left: .25em solid transparent;
+    border-right: .25em solid transparent;
+    border-top: .375em solid $select-border-color;
+    pointer-events: none;
   }
 }
