@@ -59,8 +59,8 @@ var Movie = function Movie(fileName, filePath, lang) {
         this.year         = ptn.year       || sr.year;
         this.episodeName  = ptn.episodeName;
 
-        console.debug('interpreter:', ptn, sr);
-        console.debug('Movie:', this);
+        //console.debug('interpreter:', ptn, sr);
+        //console.debug('Movie:', this);
 
         return this;
     }

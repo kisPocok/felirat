@@ -95,15 +95,12 @@ UI.appBody.ondragenter = function (e) {
 }
 UI.appBody.ondragover = function (e) {
     e.preventDefault();
-    //console.log(UI);
     UI.onFileDrag();
 };
 UI.appBody.ondragleave = function (e) {
     e.preventDefault();
     this.classList.remove('over');
-    //console.log('leave', e.target)
     if (e.target.className && exceptions.indexOf(e.target.className) === -1) {
-        //console.log('MIFASZ?', e.target.className)
         UI.onFileDrop();
     }
 };
@@ -119,9 +116,8 @@ UI.appBody.ondrop = function (e) {
 };
 
 var DogTitle = {
-    name: 'alma',
     itemList: [],
-    state: 0,
+    state: null,
     getItemsByFile: function (MovieFile) {
         var i, items = [];
         for (i in this.itemList) {
@@ -129,30 +125,13 @@ var DogTitle = {
                 items.push(this.itemList[i]);
             }
         }
-        //console.log(items);
         return items;
-    },
-    getLastItem: function () {
-        var length = this.itemList.length;
-        return this.itemList[length-1];
     }
 };
-/*
-var DogTitleObserver = O(DogTitle);
 
-// Ha a queue változik, generál hozzá html-t
-DogTitleObserver.on('change itemList.length', function (event) {
-    // TODO var spin = '<p class="mdl-spinner mdl-spinner--small mdl-js-spinner is-active"></p>';
-    var listItem = document.createElement('li');
-    listItem.className = 'list-item-' + DogTitle.getLastItem().fileName;
-    listItem.innerHTML = '<span>' + DogTitle.getLastItem().fileName + '</span><i class="material-icons  rotating">loop</i>'
-    UI.elements.list.appendChild(listItem);
 
-    // assign dom element to object
-    var MovieFile = event.object;
-    MovieFile.htmlElement = listItem;
-});
-*/
+//var DogTitleObserver = O(DogTitle);
+
 
 var addToQueue = function AddSubtitleToQueue(MovieFile) {
     MovieFile.state = 'waiting';
@@ -166,48 +145,64 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
 
         var item = UI.elements.list.querySelector(MovieFile.htmlQuery);
         var icon = item.getElementsByClassName('movie-status')[0];
-        var tooltip = item.getElementsByClassName('movie-tooltip')[0];
+        //var tooltip = item.getElementsByClassName('movie-tooltip')[0];
         if (status !== 'waiting') {
-            icon.className = icon.className.replace(/mdl-js-spinner  is-active/, 'material-icons');
-            // TODO tooltip.style.display = 'block';
+            icon.className = icon.className.replace(/mdl-js-spinner  is-active/, 'material-icons'); // drop spinner, use icon instead
+            //tooltip.style.display = 'block';
         }
         icon.innerHTML = status;
     });
 
+    var subtitleFinished = function (newState) {
+        return function (MovieFile, message) {
+            //console.debug('State:', newState, file)
+            var rows = DogTitle.getItemsByFile(MovieFile);
+            rows.map(function (MovieFile) {
+                MovieFile.state = newState;
+
+                if (newState === 'error_outline') {
+                    var item = UI.elements.list.querySelector(MovieFile.htmlQuery);
+                    var tooltip = item.getElementsByClassName('movie-tooltip')[0];
+                    tooltip.innerHTML = message;
+                    tooltip.style.display = 'block';
+                    UI.initMaterialDesign();
+                }
+            });
+        };
+    };
+    var subtitleReady  = subtitleFinished('done');
+    var subtitleFailed = subtitleFinished('error_outline');
 
     var MovieHelper = require('./resources/MovieHelper');
     var downloadSubtitle = require('./resources/SubtitleDownloader');
 
+    var createSubtitleRequest = function CreateSubtitleRequest(lang) {
+        return function (movie) {
+            return new SubtitleRequest(movie, lang);
+        }
+    }
+
     var lang = 'hun' // TODO
     var movie = new Movie(MovieFile.fileName, MovieFile.path);
+    var populateMovie = function (Movie) {
+        return Movie
+            .interpret()
+            .calculateFileSize()
+            .calculateHash();
+    }
     var searchResponseTransform = MovieHelper.wrapperPassSourceAndOutputParams(movie, lang);
 
-    Q.try(function GetMovie() { return movie; })
+    Q
+        .try(function GetMovie() { return movie; })
         .then(validateMovie)
-        .then(function populateMovie(Movie) {
-            return Movie
-                .interpret()
-                .calculateFileSize()
-                .calculateHash();
-        })
-        //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
-        .then(function CreateSubtitleRequest(movie) {
-            return new SubtitleRequest(movie, lang);
-        })
+        .then(populateMovie)
+        .then(createSubtitleRequest(lang))
         .then(searchSubtitle)
         .then(searchResponseTransform)
         .then(downloadSubtitle)
-        .then(function OutPut(result) {
-            var response = {
-                writable: result.writable,
-                path:     result.path,
-                mode:     result.mode,
-                flags:    result.flags
-            };
-            return response;
-        })
-        .then(function (output) {
-            console.debug('output:', output)
+        //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
+        .then(function (downloadResponse) {
+            console.debug('output:', downloadResponse)
             subtitleReady(MovieFile);
         })
         .catch(function (error) {
@@ -229,49 +224,8 @@ var validateMovie = function ValidateMovie(Movie) {
         // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
         throw new Error('Directory not supported yet!');
     }
-
-    /* // TODO ez azért nem kell, mert hash nélkül is mennie kell a keresésnek
-    if (movie.hash === '0000000000000000') {
-        throw new Error('Wrong hash!')
-    }
-     */
     return Movie;
 };
-
-
-var subtitleFinished = function (newState) {
-    return function (MovieFile, message) {
-        //console.debug('State:', newState, file)
-        var rows = DogTitle.getItemsByFile(MovieFile);
-        rows.map(function (MovieFile) {
-            MovieFile.state = newState;
-
-            if (newState === 'error_outline') {
-                var item = UI.elements.list.querySelector(MovieFile.htmlQuery);
-                var tooltip = item.getElementsByClassName('movie-tooltip')[0];
-                tooltip.innerHTML = message;
-                tooltip.style.display = 'block';
-                UI.initMaterialDesign();
-            }
-        });
-    };
-};
-var subtitleReady = subtitleFinished('done');
-var subtitleFailed = subtitleFinished('error_outline');
-
-/*
-var queueCheckingInProgress = false;
-var checkQueueStatus = function () {
-    console.log('check state again');
-    if (queueCheckingInProgress) {
-        console.log('Checking already in progress... exit');
-        return false;
-    }
-    queueCheckingInProgress = true;
-    console.log('Checking...');
-    //console.log('DogTitle', DogTitle);
-};
-*/
 
 var createConnection = function Connect() {
     var OpenSubtitleApi = require('./resources/OpenSubtitles');
@@ -309,7 +263,7 @@ var searchSubtitle = function SearchSub(SubtitleRequest) {
     Q
         // Search by hash
         .try(apiConnection)
-        .then(API.searchSubtitlesByHash(Movie.hash+'aa', Movie.sizeInBytes, lang))
+        .then(API.searchSubtitlesByHash(Movie.hash, Movie.sizeInBytes, lang))
         .then(deferred.resolve)
 
         // Search by title
