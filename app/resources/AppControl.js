@@ -63,16 +63,24 @@ var UI = new (function DogTitleUI () {
         var className = 'list-item-' + hash;
         var length = UI.elements.list.getElementsByClassName(className).length;
         var id = hash + '-' + length;
-        // TODO var spin = '<p class="mdl-spinner mdl-spinner--small mdl-js-spinner is-active"></p>';
-        var spin = '<i class="material-icons  rotating">loop</i>';
+
+        //var spin  = '<i id="tooltip-' + id + '" class="material-icons  movie-status  rotating">loop</i>';
+        var spin    = '<i id="tooltip-' + id + '" class="movie-status  mdl-spinner  mdl-js-spinner  is-active"></i>';
+        var tooltip = '<span class="movie-tooltip  mdl-tooltip" for="tooltip-' + id + '" style="display:none;">Hello world!</span>';
+        var title   = '<span class="movie-title">' + name + '</span>';
 
         var item = document.createElement('li');
         item.className = className;
         item.id = id;
-        item.innerHTML = '<span>' + name + '</span>' + spin;
+        item.innerHTML = title + spin + tooltip;
         UI.elements.list.appendChild(item);
+
+        this.initMaterialDesign();
+
         return '#' + item.id;
     };
+    // Material Design Lite (re)init
+    this.initMaterialDesign = componentHandler.upgradeAllRegistered
 
     return this;
 });
@@ -157,9 +165,11 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
         var status = event.value;
 
         var item = UI.elements.list.querySelector(MovieFile.htmlQuery);
-        var icon = item.getElementsByTagName('i')[0];
+        var icon = item.getElementsByClassName('movie-status')[0];
+        var tooltip = item.getElementsByClassName('movie-tooltip')[0];
         if (status !== 'waiting') {
-            icon.className = icon.className.replace(/rotating/, '');
+            icon.className = icon.className.replace(/mdl-js-spinner  is-active/, 'material-icons');
+            // TODO tooltip.style.display = 'block';
         }
         icon.innerHTML = status;
     });
@@ -172,16 +182,19 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
     var movie = new Movie(MovieFile.fileName, MovieFile.path);
     var searchResponseTransform = MovieHelper.wrapperPassSourceAndOutputParams(movie, lang);
 
-    movie
-        .interpret()
-        .calculateFileSize()
-        .calculateHash()
+    Q.try(function GetMovie() { return movie; })
         .then(validateMovie)
+        .then(function populateMovie(Movie) {
+            return Movie
+                .interpret()
+                .calculateFileSize()
+                .calculateHash();
+        })
+        //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
         .then(function CreateSubtitleRequest(movie) {
             return new SubtitleRequest(movie, lang);
         })
         .then(searchSubtitle)
-        //.then(function Debug(r) { console.debug('debug in queue:', r); return r; })
         .then(searchResponseTransform)
         .then(downloadSubtitle)
         .then(function OutPut(result) {
@@ -198,7 +211,7 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
             subtitleReady(MovieFile);
         })
         .catch(function (error) {
-            subtitleFailed(MovieFile);
+            subtitleFailed(MovieFile, error.message);
             console.error(error.message);
         })
         .done();
@@ -227,11 +240,19 @@ var validateMovie = function ValidateMovie(Movie) {
 
 
 var subtitleFinished = function (newState) {
-    return function (MovieFile) {
+    return function (MovieFile, message) {
         //console.debug('State:', newState, file)
         var rows = DogTitle.getItemsByFile(MovieFile);
-        rows.map(function (self) {
-            self.state = newState;
+        rows.map(function (MovieFile) {
+            MovieFile.state = newState;
+
+            if (newState === 'error_outline') {
+                var item = UI.elements.list.querySelector(MovieFile.htmlQuery);
+                var tooltip = item.getElementsByClassName('movie-tooltip')[0];
+                tooltip.innerHTML = message;
+                tooltip.style.display = 'block';
+                UI.initMaterialDesign();
+            }
         });
     };
 };
