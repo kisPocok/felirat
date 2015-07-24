@@ -1,50 +1,49 @@
-var request = require('request');
-var zlib    = require('zlib');
-var fs      = require('fs');
+var fs = require('fs');
 
-var MovieHelper = MovieHelper function () {
-    return {
-        subtitleExtension: 'srt'
+var MovieHelper = function MovieHelper() {
+    this.subtitleExtension = 'srt';
+
+    this.isDir = function (path) {
+        return fs.lstatSync(path).isDirectory();
     };
-};
 
-MovieHelper.prototype.isDir = function (path) {
-    return fs.lstatSync(path).isDirectory();
-};
+    this.removeFileExtension = function (fileName) {
+        return fileName.substr(0, fileName.lastIndexOf('.')) || fileName;
+    };
 
-MovieHelper.prototype.removeFileExtension = function (fileName) {
-    return fileName.substr(0, fileName.lastIndexOf('.')) || fileName;
-};
+    this.getFileExtension = function (fileName) {
+        if (!fileName) {
+            throw new Error('MISSING FILE!');
+        }
+        return fileName.split('.').pop();
+    };
 
-MovieHelper.prototype.getFileExtension = function (fileName) {
-    if (!fileName) {
-        throw new Error('MISSING FILE!');
-    }
-    return fileName.split('.').pop();
-};
+    this.isSubtitle = function (fileName) {
+        return this.getFileExtension(fileName) == this.subtitleExtension;
+    };
 
-MovieHelper.prototype.isSubtitle = function (fileName) {
-    return MovieHelper.getFileExtension(fileName) == MovieHelper.subtitleExtension;
-};
+    this.baseDir = function (path) {
+        return path.substring(0, path.lastIndexOf("/")) + "/";
+    };
 
-MovieHelper.prototype.baseDir = function (path) {
-    return path.substring(0, path.lastIndexOf("/")) + "/";
-};
+    this.srtFileName = function (fileName, lang) {
+        return fileName + '.' + lang + '.' + this.subtitleExtension;
+    };
 
-MovieHelper.prototype.srtFileName = function (fileName, lang) {
-    return fileName + '.' + lang + '.' + MovieHelper.subtitleExtension;
-};
-
-MovieHelper.prototype.wrapperPassSourceAndOutputParams = function (movie, lang) {
-    var OpenSubtitleClass = require('./OpenSubtitles');
-    var subtitleApi = new OpenSubtitleClass();
-    return function passSourceAndOutputParams(searchResponse) {
-        var finalFileName = MovieHelper.removeFileExtension(movie.fileName);
-        return {
-            source: subtitleApi.getGzipUrl(searchResponse),
-            destination: MovieHelper.baseDir(movie.path) + MovieHelper.srtFileName(finalFileName, lang)
+    this.wrapperPassSourceAndOutputParams = function (movie, lang) {
+        var OpenSubtitleClass = require('./OpenSubtitles');
+        var subtitleApi = new OpenSubtitleClass();
+        var self = this;
+        return function passSourceAndOutputParams(searchResponse) {
+            var finalFileName = self.removeFileExtension(movie.fileName);
+            return {
+                source: subtitleApi.getGzipUrl(searchResponse),
+                destination: self.baseDir(movie.path) + self.srtFileName(finalFileName, lang)
+            };
         };
     };
+
+    return this;
 };
 
 module.exports = new MovieHelper();
