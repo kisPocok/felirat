@@ -5,6 +5,7 @@ var O   = require('observed')
 var md5 = require('md5');
 var Movie = require('./resources/Movie');
 var MovieFile = require('./resources/MovieFile');
+var LangClass = require('./resources/Lang');
 //var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
@@ -12,12 +13,14 @@ var DogTitle = {};
 
 // Developer Console
 win.showDevTools();
+var Lang = new LangClass(document);
 
 win.on('minimize', function() {
     console.log('Window is minimized');
 });
-
-//localStorage.lang = 'hun'
+win.on('loaded', function() {
+    console.log('lang active', Lang);
+});
 
 var exceptions = [
     'mdl-card__title',

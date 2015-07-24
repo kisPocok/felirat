@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.html",
   "scripts": {
-    "start": "nw ."
+    "start": "nw --remote-debugging-port=9090"
   },
   "dependencies": {
     "body-parser": "~1.12.4",
@@ -26,7 +26,8 @@
     "observed": "*",
     "opensubtitles-client": "*",
     "angular-material": "0.10.*",
-    "md5": "2.*"
+    "md5": "2.*",
+    "node-localstorage": "0.5.*"
   },
   "devDependencies": {
     "less": "*"
