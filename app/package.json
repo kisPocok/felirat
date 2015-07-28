@@ -30,7 +30,10 @@
     "node-localstorage": "0.5.*"
   },
   "devDependencies": {
-    "less": "*"
+    "less": "*",
+    "nw": "*",
+    "gulp": "*",
+    "mocha": "*"
   },
   "window": {
     "title": "DogTitle",

@@ -9,7 +9,6 @@ var LangClass = require('./resources/Lang');
 //var preloader = require('./resources/Preloader');
 
 var win = gui.Window.get();
-var DogTitle = {};
 
 // Developer Console
 win.showDevTools();
@@ -29,7 +28,7 @@ var exceptions = [
     //'mdl-card__title  mdl-card--expand', // TODO ez nem maga a container?
     'mdl-card__actions mdl-card--border',
     'mdl-button__ripple-container',
-    'material-icons',
+    'material-icons'
 ];
 
 var UI = new (function DogTitleUI () {
