@@ -1,25 +1,38 @@
-
+// Requirements
 var gui = require('nw.gui');
 var Q   = require('q');
 var O   = require('observed')
 var md5 = require('md5');
 var Movie = require('./resources/Movie');
 var MovieFile = require('./resources/MovieFile');
-var LangClass = require('./resources/Lang');
 //var preloader = require('./resources/Preloader');
+
+// Storage
+if (typeof localStorage === "undefined" || localStorage === null) {
+    var LocalStorage = require('node-localstorage').LocalStorage;
+    var localStorage = new LocalStorage('../storage');
+}
+
+// Language
+var LangClass = require('./resources/Lang');
+var Lang = (new LangClass(localStorage)).init(document);
 
 var win = gui.Window.get();
 
 // Developer Console
 win.showDevTools();
-var Lang = new LangClass(document);
 
+
+/*
 win.on('minimize', function() {
     console.log('Window is minimized');
 });
+*/
+/*
 win.on('loaded', function() {
     console.log('lang active', Lang);
 });
+*/
 
 var exceptions = [
     'mdl-card__title',
@@ -130,10 +143,6 @@ var DogTitle = {
     }
 };
 
-
-//var DogTitleObserver = O(DogTitle);
-
-
 var addToQueue = function AddSubtitleToQueue(MovieFile) {
     MovieFile.state = 'waiting';
     MovieFile.htmlQuery = UI.createListItem(MovieFile);
@@ -182,9 +191,9 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
         return function (movie) {
             return new SubtitleRequest(movie, lang);
         }
-    }
+    };
 
-    var lang = 'hun' // TODO
+    var lang = Lang.get();
     var movie = new Movie(MovieFile.fileName, MovieFile.path);
     var populateMovie = function (Movie) {
         return Movie
