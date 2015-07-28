@@ -15,7 +15,7 @@ var dummy = function (action, delay) {
             console.debug('Dummy | ' + action);
         }
     }, delayTime);
-}
+};
 
 var TWD = new MovieFile(
     'The.Walking.Dead.S05.HUN.WEB-DL.XviD-DART.mkv',
