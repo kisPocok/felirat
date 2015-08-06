@@ -1,4 +1,24 @@
 module.exports = function(grunt) {
+    var pkg = require('./package.json');
+    var dependencies = Object.keys(pkg.dependencies);
+    var nodeModules = dependencies.map(function(resource) {
+        return './node_modules/' + resource + '/**/*';
+    });
+
+    var assets = [
+        './index.html',
+        './package.json',
+        './assets/**/*',
+        './css/**/*',
+        './font/**/*',
+        './images/**/*',
+        './material-design-lite/**/*',
+        './node_modules/material-design-icons/iconfont/**/*',
+        './resources/**/*'
+    ];
+
+    var buildFiles = assets.concat(nodeModules);
+
     grunt.initConfig({
         nwjs: {
             options: {
@@ -8,18 +28,7 @@ module.exports = function(grunt) {
                 //credits: './public/Credits.html',
                 //macIcns: './icon.icns', // Path to the Mac icon file
             },
-            src: [
-                './*',
-                './**/*'
-                /*
-                './app/css/*',
-                './app/font/*',
-                './app/images/*',
-                './app/material-design-lite/*',
-                './app/node_modules/*',
-                './app/resources/*'
-                */
-            ]
+            src: buildFiles
         }
     });
 
