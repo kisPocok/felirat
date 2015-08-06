@@ -1,42 +1,31 @@
 {
   "name": "DogTitle",
-  "version": "0.1.0",
+  "version": "0.0.9",
   "private": true,
   "main": "index.html",
   "scripts": {
     "start": "nw --remote-debugging-port=9090"
   },
-  "packages": {
-    "mac": {
-      "url": "http://localhost:3000/releases/updapp/mac/updapp.zip"
-    },
-    "win": {
-      "url": "http://localhost:3000/releases/updapp/win/updapp.zip"
-    },
-    "linux32": {
-      "url": "http://localhost:3000/releases/updapp/linux32/updapp.tar.gz"
-    }
-  },
   "dependencies": {
-    "q": "1.*",
-    "material-design-lite": "1.0.0-3",
-    "material-design-icons": "*",
-    "request": "2.*",
+    "material-design-lite": "1.0.*",
+    "material-design-icons": "2.*",
+    "md5": "2.*",
     "movie-title": "0.0.1",
+    "node-localstorage": "0.5.*",
+    "node-webkit-updater": "0.2.*",
     "parse-torrent-name": "0.5.*",
+    "q": "1.*",
+    "request": "2.*",
     "scene-release": "1.*",
-    "xmlrpc": "1.3.*",
     "observed": "1.1.*",
     "opensubtitles-client": "2.4.*",
-    "md5": "2.*",
-    "node-localstorage": "0.5.*",
-    "node-webkit-updater": "0.2.*"
+    "xmlrpc": "1.3.*"
   },
   "devDependencies": {
     "debug": "~2.2.0",
     "object.observe": "0.2.*",
     "less": "2.*",
-    "nw": "0.12.*",
+    "nw": "*",
     "gulp": "3.9.*",
     "mocha": "*"
   },
@@ -55,5 +44,17 @@
     "min_height": 320,
     "max_width": 320,
     "max_height": 320
+  },
+  "manifestUrl": "https://raw.githubusercontent.com/kisPocok/felirat/master/app/package.json",
+  "packages": {
+    "mac": {
+      "url": "https://raw.githubusercontent.com/kisPocok/felirat/master/app/package.json"
+    },
+    "win": {
+      "url": "http://localhost:3000/releases/updapp/win/updapp.zip"
+    },
+    "linux32": {
+      "url": "http://localhost:3000/releases/updapp/linux32/updapp.tar.gz"
+    }
   }
 }
