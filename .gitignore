@@ -1,2 +1,5 @@
 app/node_modules/
 storage/*
+npm-debug.log
+.idea
+.DS_STORE
