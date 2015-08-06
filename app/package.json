@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "debug": "~2.2.0",
-    "object.observe": "2.4.*",
+    "object.observe": "0.2.*",
     "less": "2.*",
     "nw": "0.12.*",
     "gulp": "3.9.*",
