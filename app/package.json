@@ -4,9 +4,11 @@
   "private": true,
   "main": "index.html",
   "scripts": {
-    "start": "nw --remote-debugging-port=9090"
+    "start": "nw --remote-debugging-port=9090",
+    "build": "./node_modules/nw-builder/bin/nwbuild . -p osx64 -v latest -o ./"
   },
   "dependencies": {
+    "nw": "*",
     "material-design-lite": "1.0.*",
     "material-design-icons": "2.*",
     "md5": "2.*",
@@ -22,13 +24,10 @@
     "xmlrpc": "1.3.*"
   },
   "devDependencies": {
-    "nw": "*",
+    "grunt-nw-builder": "0.2.*",
     "nw-builder": "2.*",
-    "debug": "~2.2.0",
-    "object.observe": "0.2.*",
     "less": "2.*",
-    "gulp": "3.9.*",
-    "mocha": "*"
+    "grunt": "0.4.*"
   },
   "window": {
     "title": "DogTitle",
