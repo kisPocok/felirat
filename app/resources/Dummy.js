@@ -41,7 +41,6 @@ onload = function () {
     console.log('Dummy is running')
     //dummy("UI.appBody.className = 'dragging';");
     //dummy("UI.appBody.className = '';");
-    dummy("UI.showList()", 0);
     dummy("UI.showQueue()", 0);
     //dummy("addToQueue(TWD)");
     //dummy("addToQueue(GOT)");
