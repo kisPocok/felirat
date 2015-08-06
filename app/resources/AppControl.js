@@ -1,16 +1,18 @@
 // Requirements
 var gui = require('nw.gui');
 var Q   = require('q');
-var O   = require('observed')
+var O   = require('observed');
 var md5 = require('md5');
 var Movie = require('./resources/Movie');
 var MovieFile = require('./resources/MovieFile');
+var SelfUpdate = require('./resources/SelfUpdater');
+
 //var preloader = require('./resources/Preloader');
 
 // Storage
 if (typeof localStorage === "undefined" || localStorage === null) {
     var LocalStorage = require('node-localstorage').LocalStorage;
-    var localStorage = new LocalStorage('../storage');
+    localStorage = new LocalStorage('../storage');
 }
 
 // Language
@@ -59,14 +61,12 @@ var UI = new (function DogTitleUI () {
     this.onFileDrop = function () {
         this.appBody.classname = '';
     };
-    this.showList = function () {
+    this.showQueue = function () {
         // TODO
         this.elements.description.style.display = 'none'; // .hide()
         this.elements.queue.style.display = 'block'; // .show()
+        this.elements.queue.style.display = 'inline-block'; // .show()
         this.elements.header.className = 'mdl-card__title  mdl-card--expand  small'; // addClass('small')
-    };
-    this.showQueue = function () {
-        UI.elements.queue.style.display = 'inline-block';
     };
     this.getListItem = function (fileName) {
         return document.getElementsByClassName('list-item-' + fileName)[0];
@@ -106,7 +106,7 @@ window.ondrop = function(e) { e.preventDefault(); return false };
 UI.appBody.ondragenter = function (e) {
     e.preventDefault();
     this.classList.add('over');
-}
+};
 UI.appBody.ondragover = function (e) {
     e.preventDefault();
     UI.onFileDrag();
@@ -144,6 +144,9 @@ var DogTitle = {
 };
 
 var addToQueue = function AddSubtitleToQueue(MovieFile) {
+
+    UI.showQueue();
+
     MovieFile.state = 'waiting';
     MovieFile.htmlQuery = UI.createListItem(MovieFile);
     var index = DogTitle.itemList.push(MovieFile);
@@ -190,7 +193,7 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
     var createSubtitleRequest = function CreateSubtitleRequest(lang) {
         return function (movie) {
             return new SubtitleRequest(movie, lang);
-        }
+        };
     };
 
     var lang = Lang.get();
@@ -200,7 +203,7 @@ var addToQueue = function AddSubtitleToQueue(MovieFile) {
             .interpret()
             .calculateFileSize()
             .calculateHash();
-    }
+    };
     var searchResponseTransform = MovieHelper.wrapperPassSourceAndOutputParams(movie, lang);
 
     Q
