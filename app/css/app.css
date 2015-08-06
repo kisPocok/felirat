@@ -30,7 +30,8 @@ body.dragging #section-description {
 .demo-card-square > .mdl-card__title,
 .demo-card-square > .mdl-card__dropfiles {
   color: #fff;
-  background: bottom right 15% no-repeat #46B6AC; }
+  background: bottom right 15% no-repeat #46B6AC;
+  transition: height 400ms cubic-bezier(0.165, 0.84, 0.44, 1); }
 
 .mdl-card__dropfiles {
   text-align: center;
@@ -38,7 +39,7 @@ body.dragging #section-description {
   position: absolute;
   width: 290px;
   top: -50px;
-  transition: all 400ms cubic-bezier(0.165, 0.84, 0.44, 1); }
+  transition: height 400ms cubic-bezier(0.165, 0.84, 0.44, 1); }
 
 .dragging .mdl-card__dropfiles {
   /*display: inline-block;*/

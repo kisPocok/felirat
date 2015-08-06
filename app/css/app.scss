@@ -5,6 +5,10 @@
 /* Material Design Icons */
 @import '../font/material.css';
 
+@mixin transition-all($property) {
+    transition: $property 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+}
+
 /* App design */
 body {
   -webkit-app-region: drag;
@@ -16,7 +20,9 @@ button { -webkit-app-region: no-drag; }
 body.dragging #section-description { margin-top: -70px; }
 #section-description {
   pointer-events: none;
-  transition: margin 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  //transition: margin 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  @include transition-all(margin);
+
   * { pointer-events: none; }
   b {
     font-weight: 900;
@@ -33,6 +39,8 @@ body.dragging #section-description { margin-top: -70px; }
 .demo-card-square > .mdl-card__dropfiles {
   color: #fff;
   background: bottom right 15% no-repeat #46B6AC;
+  //transition: height 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  @include transition-all(height);
 }
 
 .mdl-card__dropfiles {
@@ -41,7 +49,8 @@ body.dragging #section-description { margin-top: -70px; }
   position: absolute;
   width: 290px;
   top: -50px;
-  transition: all 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  //transition: height 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  @include transition-all(height);
 }
 .dragging .mdl-card__dropfiles { /*display: inline-block;*/ top: 10px; }
 
@@ -66,7 +75,8 @@ body.dragging #section-description { margin-top: -70px; }
 }
 #section-queue {
   overflow: scroll;
-  transition: height 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  //transition: height 400ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  @include transition-all(height);
 }
 body.dragging {
   #queue {
