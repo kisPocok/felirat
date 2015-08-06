@@ -5,11 +5,10 @@
   "main": "index.html",
   "scripts": {
     "start": "nw --remote-debugging-port=9090",
-    "build": "grunt ."
+    "build": "grunt"
   },
   "dependencies": {
     "nw": "*",
-    "material-design-lite": "1.0.*",
     "md5": "2.*",
     "movie-title": "0.0.1",
     "node-localstorage": "0.5.*",
@@ -27,6 +26,7 @@
     "grunt-nw-builder": "0.2.*",
     "less": "2.*",
     "material-design-icons": "2.*",
+    "material-design-lite": "1.0.*",
     "nw-builder": "2.*"
   },
   "window": {

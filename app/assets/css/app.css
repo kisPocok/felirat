@@ -150,3 +150,11 @@ select:focus {
     border-right: .25em solid transparent;
     border-top: 0.375em solid rgba(0,0,0, 0.06);
     pointer-events: none; }
+
+/* Overwrite material design */
+[class*="mdl-"] {
+  font-family: 'San Francisco Text', 'Helvetica', 'Arial', sans-serif; }
+
+h1[class*="mdl-"] {
+  font-family: 'San Francisco Display', 'Helvetica', 'Arial', sans-serif;
+  font-weight: 100; }
