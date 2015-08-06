@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "grunt": "0.4.*",
-    "grunt-nw-builder": "0.2.*",
+    "grunt-nw-builder": "2.*",
     "less": "2.*",
     "material-design-icons": "2.*",
     "material-design-lite": "1.0.*",
