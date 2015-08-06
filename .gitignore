@@ -1,5 +1,6 @@
+app/cache/
 app/node_modules/
-storage/*
+storage/
 npm-debug.log
 .idea
 .DS_STORE
