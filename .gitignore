@@ -1,5 +1,7 @@
+app/build/
 app/cache/
 app/node_modules/
+material-design-lite/
 storage/
 npm-debug.log
 .idea

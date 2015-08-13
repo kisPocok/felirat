@@ -33,7 +33,7 @@ module.exports = function SelfUpdater (gui) {
         console.log('STEP 0');
         // ------------- Step 1 -------------
         upd.checkNewVersion(function(error, newVersionExists, manifest) {
-            console.log('STEP 1');
+            console.log('STEP 1', newVersionExists);
             if (!error && newVersionExists) {
 
                 // ------------- Step 2 -------------

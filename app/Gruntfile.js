@@ -9,11 +9,7 @@ module.exports = function(grunt) {
         './index.html',
         './package.json',
         './assets/**/*',
-        './css/**/*',
-        './font/**/*',
-        './images/**/*',
-        './material-design-lite/**/*',
-        './node_modules/material-design-icons/iconfont/**/*',
+        './node_modules/material-design-icons/iconfont/**/*', // Material Icons Fonts
         './resources/**/*'
     ];
 

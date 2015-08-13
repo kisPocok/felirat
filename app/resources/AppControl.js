@@ -1,5 +1,8 @@
+var debug = true;
+
 // Requirements
 var gui = require('nw.gui');
+var win = gui.Window.get();
 var Q   = require('q');
 var O   = require('observed');
 var md5 = require('md5');
@@ -9,7 +12,6 @@ var MovieFile = require('./resources/MovieFile');
 
 var Updater = require('./resources/SelfUpdater');
 var SelfUpdater = new Updater(gui);
-
 
 // Storage
 if (typeof localStorage === "undefined" || localStorage === null) {
@@ -21,10 +23,8 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 var LangClass = require('./resources/Lang');
 var Lang = (new LangClass(localStorage)).init(document);
 
-var win = gui.Window.get();
-
 // Developer Console
-win.showDevTools();
+if (debug) win.showDevTools();
 
 
 /*
