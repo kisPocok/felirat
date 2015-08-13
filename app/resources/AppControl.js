@@ -5,9 +5,9 @@ var O   = require('observed');
 var md5 = require('md5');
 var Movie = require('./resources/Movie');
 var MovieFile = require('./resources/MovieFile');
-var SelfUpdate = require('./resources/SelfUpdater');
+// TODO var preloader = require('./resources/Preloader');
+var SelfUpdater = new (require('./resources/SelfUpdater'))(gui);
 
-//var preloader = require('./resources/Preloader');
 
 // Storage
 if (typeof localStorage === "undefined" || localStorage === null) {
