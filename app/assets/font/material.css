@@ -11,7 +11,7 @@
 	url(../../node_modules/material-design-icons/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 .material-icons {
-	font-family: 'Material Icons';
+	font-family: 'Material Icons' !important;
 	font-weight: normal;
 	font-style: normal;
 	font-size: 18px;  /* Preferred icon size */
