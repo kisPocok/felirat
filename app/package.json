@@ -36,6 +36,7 @@
     "fullscreen": false,
     "toolbar": false,
     "show": true,
+    "always-on-top": true,
     "position": "center",
     "resizable": false,
     "width": 320,
