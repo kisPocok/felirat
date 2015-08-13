@@ -6,7 +6,9 @@ var md5 = require('md5');
 var Movie = require('./resources/Movie');
 var MovieFile = require('./resources/MovieFile');
 // TODO var preloader = require('./resources/Preloader');
-var SelfUpdater = new (require('./resources/SelfUpdater'))(gui);
+
+var Updater = require('./resources/SelfUpdater');
+var SelfUpdater = new Updater(gui);
 
 
 // Storage
