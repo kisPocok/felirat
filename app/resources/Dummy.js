@@ -1,12 +1,13 @@
-var MovieFile = require("./resources/MovieFile");
+var MovieFile = require("./MovieFile");
 
 var delayTime = 1000;
 var dummy = function (action, delay) {
+    var self = this;
     delay = delay || 600;
     delayTime += delay;
     setTimeout(function () {
         if (typeof action === 'function') {
-            return console.debug('Dummy | inline_function', action());
+            return console.debug('Dummy | inline_function', action.bind(self));
         }
         var response = eval(action);
         if (response !== undefined) {
@@ -15,6 +16,8 @@ var dummy = function (action, delay) {
             console.debug('Dummy | ' + action);
         }
     }, delayTime);
+
+    return this;
 };
 
 var TWD = new MovieFile(
@@ -37,15 +40,13 @@ var ROBO = new MovieFile(
     'Mr.Robot.S01E03.d3bug.1080p.WEB-DL.DD5.1.H.264-RARBG.mkv',
     '/Users/vault/Desktop/Mr.Robot.S01E03.d3bug.1080p.WEB-DL.DD5.1.H.264-RARBG.mkv'
 );
-onload = function () {
-    console.log('Dummy is running')
-    //dummy("UI.appBody.className = 'dragging';");
-    //dummy("UI.appBody.className = '';");
-    dummy("UI.showQueue()", 0);
+module.exports = function RunDummy(UI) {
+    console.log('Dummy is running');
+    dummy.call(UI, UI.showQueue, 0);
+    // TODO dummy.call(this, "addToQueue(ROBO)", 100);
     //dummy("addToQueue(TWD)");
     //dummy("addToQueue(GOT)");
     //dummy("addToQueue(FLASH)");
-    dummy("addToQueue(ROBO)", 100);
     //dummy("addToQueue(DD)");
     //dummy("subtitleFailed(TWD)", 1500);
     //dummy("subtitleReady(GOT)", 1000);
