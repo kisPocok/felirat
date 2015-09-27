@@ -1,0 +1,3 @@
+[submodule "vendor/is_installed"]
+	path = vendor/is_installed
+	url = https://gist.github.com/733f642dd60f7ba7bc66.git
