@@ -15,14 +15,20 @@ var getAllProviders = function () {
     return response;
 };
 
-/*
-var getAllData = function (providers, movie) {
-    Object.keys(providers).map(function (key) {
-        var provider = providers[key];
-        provider(movie).parse().get();
-    });
+var shortcut = function (action) {
+    if (action !== 'merge' && action !== 'fill') {
+        throw new Error('Missing implementation!');
+    }
+    var callbackName = action + 'Into';
+
+    return function (provider, movie) {
+        var data = provider(movie).parse().get();
+        return data[callbackName](movie);
+    };
 };
-*/
+
+var merge = shortcut('merge');
+var fill  = shortcut('fill');
 
 module.exports = (function MovieInterpreter(Movie) {
     var Movie = require('../Movie'); // TODO
@@ -32,12 +38,12 @@ module.exports = (function MovieInterpreter(Movie) {
     );
 
     var providers = getAllProviders();
-    var data = providers.MovieTitle(movie).parse().get();
-    var data2 = providers.ParseTorrentName(movie).parse().get();
-    var data3 = providers.SceneRelease(movie).parse().get();
-    movie.populate(data);
-    movie.fill(data2);
-    movie.fill(data3);
+
+    // populate movie
+    merge(providers.MovieTitle, movie);
+    fill(providers.ParseTorrentName, movie);
+    fill(providers.SceneRelease, movie);
 
     console.log(movie);
+    return movie;
 }());

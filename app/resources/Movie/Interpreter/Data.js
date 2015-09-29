@@ -29,4 +29,12 @@ module.exports = function InterpreterData(
             return typeof self[key] !== 'function';
         });
     };
+
+    this.mergeInto = function (Movie) {
+        Movie.populate(this);
+    };
+
+    this.fillInto = function (Movie) {
+        Movie.fill(this);
+    };
 };
