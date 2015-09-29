@@ -13,11 +13,6 @@ DefaultInterpreter.prototype.parse = function () {
     return null;
 };
 
-DefaultInterpreter.prototype.populate = function () {
-    console.error('Not implemented "populate" func');
-    return null;
-};
-
 DefaultInterpreter.prototype.get = function () {
     return new InterpreterData(this.data.title, this.data.season, this.data.episode);
 };

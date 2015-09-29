@@ -11,7 +11,7 @@ inherits(ParseTorrentName, DefaultInterpreter);
 
 ParseTorrentName.prototype.parse = function () {
     //ParseTorrentName.super_.prototype.parse.apply(this);
-    this.data = providerClass(this.movie.name);
+    this.data = providerClass(this.movie.fileName);
     return this;
 };
 

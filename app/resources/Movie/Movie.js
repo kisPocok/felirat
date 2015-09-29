@@ -38,18 +38,31 @@ module.exports = function Movie(fileName, filePath) {
             });
     };
 
-    this.mergeWithLowPriority = function (InterpreterData) {
-        this.title = this.title ? this.title : InterpreterData.title;
-        this.title = this.title ? this.title : InterpreterData.title;
-        this.season = null;
-        this.episode = null;
-        this.episodeName = null;
-        this.releaseGroup = null;
-        this.audio = null;
-        this.codec = null;
-        this.quality = null;
-        this.resoultion = null;
-        this.year = null;
+    var updateOnNonExist = function (InterpreterData) {
+        var self = this;
+        return function (field) {
+            if (self[field] === null) {
+                self[field] = InterpreterData[field];
+            }
+        };
+    };
+
+    /**
+     * Update every field
+     * @param InterpreterData
+     */
+    this.populate = function (InterpreterData) {
+        var fill = updateOnNonExist.call(this, InterpreterData);
+        InterpreterData.getFields().map(fill);
+    };
+
+    /**
+     * Update fields which are empty (null)
+     * @param InterpreterData
+     */
+    this.fill = function (InterpreterData) {
+        var fill = updateOnNonExist.call(this, InterpreterData);
+        InterpreterData.getNonEmptyFields().map(fill);
     };
 
     return this;

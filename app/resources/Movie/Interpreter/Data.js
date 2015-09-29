@@ -15,4 +15,18 @@ module.exports = function InterpreterData(
     this.quality      = quality      || null;
     this.resoultion   = resolution   || null;
     this.year         = year         || null;
+
+    this.getNonEmptyFields = function () {
+        var self = this;
+        return Object.keys(this).filter(function (key) {
+            return self[key] !== null && typeof self[key] !== 'function';
+        });
+    };
+
+    this.getFields = function () {
+        var self = this;
+        return Object.keys(this).filter(function (key) {
+            return typeof self[key] !== 'function';
+        });
+    };
 };

@@ -11,7 +11,7 @@ inherits(SceneRelease, DefaultInterpreter);
 
 SceneRelease.prototype.parse = function () {
     //SceneRelease.super_.prototype.parse.apply(this);
-    this.data = providerClass(this.movie.name);
+    this.data = providerClass(this.movie.fileName);
     return this;
 };
 

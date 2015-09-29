@@ -1,3 +1,4 @@
+var providers = require('./Config');
 
 var registerProvider = function (providerClassName) {
     var provider = require('./Provider/' + providerClassName);
@@ -7,19 +8,36 @@ var registerProvider = function (providerClassName) {
 };
 
 var getAllProviders = function () {
-    return {
-        'MovieTitle': registerProvider('MovieTitle'),
-        'SceneRelease': registerProvider('SceneRelease'),
-        'ParseTorrentName': registerProvider('ParseTorrentName')
-    };
+    var response = {};
+    providers.map(function (provider) {
+        response[provider] = registerProvider(provider);
+    });
+    return response;
 };
 
-module.exports = (function MovieInterpreter(Movie, Parser) {
-    var Movie = {'name': 'Mr.Robot.S01E07.1080p.HDTV.x264-TASTETV'}; // TODO
+/*
+var getAllData = function (providers, movie) {
+    Object.keys(providers).map(function (key) {
+        var provider = providers[key];
+        provider(movie).parse().get();
+    });
+};
+*/
+
+module.exports = (function MovieInterpreter(Movie) {
+    var Movie = require('../Movie'); // TODO
+    var movie = new Movie(
+        'Fear.the.Walking.Dead.S01E04.Not.Fade.Away.720p.WEB-DL.DD5.1.H.264-NTb.mkv',
+        '/User/vault/Movies/_seed/Fear.the.Walking.Dead.S01E04.720p.WEB-DL.DD5.1.H.264-NTb/Fear.the.Walking.Dead.S01E04.Not.Fade.Away.720p.WEB-DL.DD5.1.H.264-NTb.mkv'
+    );
+
     var providers = getAllProviders();
-    console.log([
-        providers.MovieTitle(Movie).parse().get(),
-        providers.SceneRelease(Movie).parse().get(),
-        providers.ParseTorrentName(Movie).parse().get(),
-    ]);
+    var data = providers.MovieTitle(movie).parse().get();
+    var data2 = providers.ParseTorrentName(movie).parse().get();
+    var data3 = providers.SceneRelease(movie).parse().get();
+    movie.populate(data);
+    movie.fill(data2);
+    movie.fill(data3);
+
+    console.log(movie);
 }());

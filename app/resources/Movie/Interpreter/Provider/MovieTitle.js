@@ -10,7 +10,7 @@ function MovieTitle(Movie) {
 inherits(MovieTitle, DefaultInterpreter);
 
 MovieTitle.prototype.parse = function () {
-    this.data = providerClass(this.movie.name);
+    this.data = providerClass(this.movie.fileName);
     return this;
 };
 
