@@ -1,3 +1,5 @@
+var md5 = require('md5');
+
 module.exports = function DogTitleUI (document, componentHandler) {
     this.elements = {
         'header':      document.getElementById('section-header'),

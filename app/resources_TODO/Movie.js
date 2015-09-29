@@ -27,9 +27,9 @@ var Movie = function Movie(fileName, filePath, lang) {
 
     this.calculateFileSize = function CalculateFileSize() {
         var stats = require('fs').statSync(this.path);
-        this.sizeInBytes = stats["size"];
+        this.sizeInBytes = stats.size;
         return this;
-    }
+    };
 
     this.calculateHash = function CalculateHash() {
         var opensubtitles = require("opensubtitles-client");
@@ -39,7 +39,7 @@ var Movie = function Movie(fileName, filePath, lang) {
                 self.hash = hash;
                 return self;
             });
-    }
+    };
 
     this.interpret = function InterpretMovieDetails() {
         var ptn = parseTorrentName(this.fileNameWithoutExtension);
@@ -63,7 +63,7 @@ var Movie = function Movie(fileName, filePath, lang) {
         //console.debug('Movie:', this);
 
         return this;
-    }
+    };
 
     return this;
 };

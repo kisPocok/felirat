@@ -188,7 +188,6 @@ var validateMovie = function ValidateMovie(Movie) {
         throw new Error('Huh?');
     }
 
-
     if (MovieHelper.isDir(Movie.path) === true) {
         // TODO filename-et ellenőrízni, hogy mappa-e. Ha igen minden benne lévő fájlt csekkolni kell.
         throw new Error('Directory not supported yet!');
@@ -196,10 +195,7 @@ var validateMovie = function ValidateMovie(Movie) {
     return Movie;
 };
 
-var createConnection = function Connect() {
-    var OpenSubtitleApi = require('./resources/OpenSubtitles');
-    var API = new OpenSubtitleApi();
-
+var createConnection = function Connect(API) {
     var ConnectionError = function (error) {
         console.error('Connection Error:', error);
     };
@@ -211,7 +207,7 @@ var createConnection = function Connect() {
     var connectionPromise = Q.try(API.connect())
         .catch(ConnectionError)
         .then(API.logIn('CommanderSub', 'yY9oSnSYt9', 'OSTestUserAgent'))
-        .catch(AuthError);;
+        .catch(AuthError);
 
     return function getConnection() {
         return connectionPromise;
@@ -226,7 +222,8 @@ var searchSubtitle = function SearchSub(SubtitleRequest) {
 
     var OpenSubtitleApi = require('./resources/OpenSubtitles');
     var API = new OpenSubtitleApi();
-    var apiConnection = createConnection();
+
+    var apiConnection = createConnection(API);
     var deferred = Q.defer();
 
     Q

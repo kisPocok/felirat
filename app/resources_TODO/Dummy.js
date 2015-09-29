@@ -37,14 +37,14 @@ var DD = new MovieFile(
     '/Users/vault/Downloads/Daredevil.S01.PROPER.720p.WEBRip.x264-SNEAkY/Daredevil.S01E01.720p.WEBRip.x264-SNEAkY.mkv'
 );
 var ROBO = new MovieFile(
-    'Mr.Robot.S01E03.d3bug.1080p.WEB-DL.DD5.1.H.264-RARBG.mkv',
-    '/Users/vault/Desktop/Mr.Robot.S01E03.d3bug.1080p.WEB-DL.DD5.1.H.264-RARBG.mkv'
+    'mr.robot.s01e07.1080p.hdtv.x264-tastetv.mkv',
+    '/Users/vault/Movies/_seed/Mr.Robot.S01E07.1080p.HDTV.x264-TASTETV/mr.robot.s01e07.1080p.hdtv.x264-tastetv.mkv'
 );
 module.exports = function RunDummy(UI) {
     console.log('Dummy is running');
     dummy.call(UI, UI.showQueue, 0);
     // TODO dummy.call(this, "addToQueue(ROBO)", 100);
-    //dummy("addToQueue(TWD)");
+    //dummy("addToQueue(ROBO)");
     //dummy("addToQueue(GOT)");
     //dummy("addToQueue(FLASH)");
     //dummy("addToQueue(DD)");
