@@ -3,10 +3,12 @@ var debug = true;
 // Requirements
 var Q = require('q');
 
+/*
 process.argv.slice(2).forEach(function (val, index, array) {
     // TODO
     console.log(index + ': ' + val);
 });
+*/
 
 var createConnection = function Connect(SubtitleProvider) {
     var ConnectionError = function (error) {
@@ -27,7 +29,7 @@ var createConnection = function Connect(SubtitleProvider) {
     };
 };
 
-var searchSubtitle = function SearchSub(apiConnection, SubtitleRequest) {
+var searchSubtitle = function SearchSub(api, apiConnection, SubtitleRequest) {
     var Movie = SubtitleRequest.for;
     var lang = SubtitleRequest.lang;
 
@@ -38,17 +40,17 @@ var searchSubtitle = function SearchSub(apiConnection, SubtitleRequest) {
     Q
         // Search by hash
         .try(apiConnection)
-        .then(API.searchSubtitlesByHash(Movie.hash, Movie.sizeInBytes, lang))
+        .then(api.searchSubtitlesByHash(Movie.hash, Movie.sizeInBytes, lang))
         .then(deferred.resolve)
 
         // Search by title
         .catch(apiConnection)
-        .then(API.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
+        .then(api.searchSubtitles(Movie.title, Movie.season, Movie.episode, lang, 1))
         .then(deferred.resolve)
 
         // Search by file name
         .catch(apiConnection)
-        .then(API.searchSubtitlesByFileName(Movie.fileName, lang))
+        .then(api.searchSubtitlesByFileName(Movie.fileName, lang))
         .then(deferred.resolve)
 
         // End it
@@ -65,6 +67,6 @@ module.exports = (function () {
     var SubtitleProvider = require('./Providers/OpenSubtitles');
     var api = new SubtitleProvider();
     var apiConnection = createConnection(api);
-    searchSubtitle(apiConnection)
+    searchSubtitle(api, apiConnection);
     console.log(apiConnection);
 }());

@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "start": "nw --remote-debugging-port=9090",
-    "build": "grunt"
+    "build": "grunt",
+    "test": "./node_modules/mocha/bin/mocha --reporter spec"
   },
   "dependencies": {
     "md5": "2.*",
@@ -27,7 +28,9 @@
     "less": "2.*",
     "material-design-icons": "2.*",
     "material-design-lite": "1.0.*",
-    "nw-builder": "2.*"
+    "nw-builder": "2.*",
+    "mocha": "*",
+    "chai": "*"
   },
   "window": {
     "title": "DogTitle",

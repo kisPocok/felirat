@@ -4,7 +4,16 @@ var MovieHelper = function MovieHelper() {
     this.subtitleExtension = 'srt';
 
     this.isDir = function (path) {
+        this.isReadable(path);
         return fs.lstatSync(path).isDirectory();
+    };
+
+    this.isWritable = function (path) {
+        fs.accessSync(path, fs.W_OK);
+    };
+
+    this.isReadable = function (path) {
+        fs.accessSync(path, fs.R_OK);
     };
 
     this.removeFileExtension = function (fileName) {
@@ -13,7 +22,7 @@ var MovieHelper = function MovieHelper() {
 
     this.getFileExtension = function (fileName) {
         if (!fileName) {
-            throw new Error('MISSING FILE!');
+            throw new Error('Missing fileName!');
         }
         return fileName.split('.').pop();
     };
