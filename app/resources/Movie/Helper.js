@@ -1,7 +1,7 @@
 var fs = require('fs');
 
 var MovieHelper = function MovieHelper() {
-    this.subtitleExtension = 'srt';
+    this.validSubtitleExtension = 'srt';
 
     this.isDir = function (path) {
         this.isReadable(path);
@@ -28,7 +28,7 @@ var MovieHelper = function MovieHelper() {
     };
 
     this.isSubtitle = function (fileName) {
-        return this.getFileExtension(fileName) == this.subtitleExtension;
+        return this.getFileExtension(fileName) === this.validSubtitleExtension;
     };
 
     this.baseDir = function (path) {
@@ -36,7 +36,7 @@ var MovieHelper = function MovieHelper() {
     };
 
     this.srtFileName = function (fileName, lang) {
-        return fileName + '.' + lang + '.' + this.subtitleExtension;
+        return fileName + '.' + lang + '.' + this.validSubtitleExtension;
     };
 
     this.wrapperPassSourceAndOutputParams = function (movie, lang) {
