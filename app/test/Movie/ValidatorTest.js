@@ -22,18 +22,20 @@ var createUnwritableDirDirectory = function (path) {
 
 
 describe("Movie/Helper", function() {
+    var unreadableDir = './test/Movie/Test_UnreadableDir/';
+    var unwritableDir = './test/Movie/Test_UnwritableDir/';
+
     describe("isDir", function() {
         it("validDirShouldPass", function() {
             var actual = Helper.isDir('.');
-            expect(true).to.equal(actual);
+            expect(actual).to.equal(true);
         });
         it("invalidDirectoryShouldThrowEnoentError", function() {
             expect(Helper.isDir.bind(Helper, './ValidatorTest.js')).to.throw(/ENOENT/); // No such file or dir
         });
         it("unreadableDirectoryShouldThrowEaccessError", function() {
-            var path = './test/Movie/Test_UnreadableDir/';
-            createUnreadableDirectory(path);
-            expect(Helper.isDir.bind(Helper, path)).to.throw(/EACCES/); // permission denied
+            createUnreadableDirectory(unreadableDir);
+            expect(Helper.isDir.bind(Helper, unreadableDir)).to.throw(/EACCES/); // permission denied
         });
     });
 
@@ -42,9 +44,8 @@ describe("Movie/Helper", function() {
             expect(Helper.isWritable.bind(Helper, './test/Movie/')).to.not.throw(/E/);
         });
         it("unwritableDirectoryShouldThrowEaccessError", function() {
-            var path = './test/Movie/Test_UnwritableDir/';
-            createUnwritableDirDirectory(path);
-            expect(Helper.isWritable.bind(Helper, path)).to.throw(/EACCES/); // permission denied
+            createUnwritableDirDirectory(unwritableDir);
+            expect(Helper.isWritable.bind(Helper, unwritableDir)).to.throw(/EACCES/); // permission denied
         });
     });
 
@@ -53,9 +54,8 @@ describe("Movie/Helper", function() {
             expect(Helper.isReadable.bind(Helper, './test/Movie/')).to.not.throw(/E/);
         });
         it("readableDirectoryShouldntThrowEaccessError", function() {
-            var path = './test/Movie/Test_UnreadableDir/';
-            createUnreadableDirectory(path);
-            expect(Helper.isReadable.bind(Helper, path)).to.throw(/EACCES/); // permission denied
+            createUnreadableDirectory(unreadableDir);
+            expect(Helper.isReadable.bind(Helper, unreadableDir)).to.throw(/EACCES/); // permission denied
         });
     });
 
@@ -63,12 +63,12 @@ describe("Movie/Helper", function() {
         it("removeFileExtensionShouldPass", function() {
             var expected = 'Walking.Dead.s06e01';
             var actual = Helper.removeFileExtension(expected + '.mkv');
-            expect(expected).to.equal(actual);
+            expect(actual).to.equal(expected);
         });
         it("withoutExtensionShouldPassOriginalValue", function() {
             var data = 'almafa';
             var actual = Helper.removeFileExtension(data);
-            expect(data).to.equal(actual);
+            expect(actual).to.equal(data);
         });
     });
 
@@ -76,12 +76,56 @@ describe("Movie/Helper", function() {
         it("rightFileNameShouldPass", function() {
             var data = 'Walking.Dead.s06e01.mkv';
             var actual = Helper.getFileExtension(data);
-            expect('mkv').to.equal(actual);
+            expect(actual).to.equal('mkv');
         });
         it("withoutExtensionShouldPassOriginalValue", function() {
             var data = 'almafa';
             var actual = Helper.getFileExtension(data);
-            expect(data).to.equal(actual);
+            expect(actual).to.equal(data);
         });
     });
+
+    describe("isSubtitle", function () {
+        it("srtShouldBeValid", function() {
+            var data = 'example.srt';
+            var actual = Helper.isSubtitle(data);
+            expect(actual).to.be.true;
+        });
+        it("mkvShouldBeInValid", function() {
+            var data = 'example.mkv';
+            var actual = Helper.isSubtitle(data);
+            expect(actual).to.be.false;
+        });
+    });
+
+    describe("baseDir", function () {
+        var dir  = './example/';
+
+        it("filePathShouldBeValidDirectory", function() {
+            var file = 'file.mkv';
+            var actual = Helper.baseDir(dir + file);
+            expect(actual).to.equal(dir);
+        });
+        it("directoryShouldBeEqual", function() {
+            var anotherDir = 'alma/';
+            var actual = Helper.baseDir(dir + anotherDir);
+            expect(actual).to.equal(dir + anotherDir);
+        });
+    });
+
+    describe("srtFileName", function () {
+        it("alma", function() {
+            var lang = 'hun';
+            var fileName = 'The.Walking.Dead.s01e01';
+            var actual = Helper.srtFileName(fileName, lang);
+            expect(actual).to.equal(fileName + '.' + lang + '.srt');
+        });
+    });
+
+    // Cleanup
+    after(function Cleanup() {
+        fs.rmdirSync(unreadableDir);
+        fs.rmdirSync(unwritableDir);
+    });
+
 });
