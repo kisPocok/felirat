@@ -1,6 +1,7 @@
 app/build/
 app/cache/
 app/node_modules/
+app/test/Movie/Test_*
 material-design-lite/
 storage/
 npm-debug.log
