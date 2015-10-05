@@ -1,9 +1,11 @@
 var Dao = require('./Dao');
 
-module.exports = function LangLogic(db) {
+module.exports = function LangLogic() {
+    this.db = Dao.createDefault();
 
-    this.createDefault = function () {
-        this.db = new Dao();
+    this.useTestDB = function () {
+        this.db = Dao.createForTest();
+        return this;
     }.bind(this);
 
     this.get = function GetLang () {
@@ -11,7 +13,7 @@ module.exports = function LangLogic(db) {
     }.bind(this);
 
     this.set = function SetLang (lang) {
-        return this.db.set('lang', lang);
+        return this.db.set(lang);
     }.bind(this);
 
     this.updateLanguageSelector = function UpdateHTMLSelect () {
