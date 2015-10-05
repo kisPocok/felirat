@@ -24,4 +24,10 @@ describe("Lang/Logic", function() {
     it("logicGetWithoutPersistentDataShouldReturnEngAsDefault", function () {
         expect(logic.get()).to.equal('eng');
     });
+
+    it("logicUseTestDbShouldNotOverwriteLiveDB", function () {
+        var liveLogic = new Logic();
+        logic.set('hun');
+        expect(liveLogic.get()).to.equal('eng');
+    });
 });
