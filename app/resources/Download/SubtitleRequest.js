@@ -1,36 +1,42 @@
 module.exports = function SubtitleRequest(source, destination) {
     this.source = source;
     this.destination = destination;
+    var movieHelper = require('../Movie/Helper');
 
+    /**
+     * @return {boolean}
+     */
     var isSourceValid = function CheckSource() {
-        if (!this.toSource) {
-            return false;
-        }
+        return this.source && this.source.match('^http(s?)://(.*)$');
+    }.bind(this);
 
-        // TODO
-        return true;
-    };
-
+    /**
+     * @return {boolean}
+     */
     var isDestinationWritable = function CheckDestination() {
-        if (!this.destination) {
+        try {
+            movieHelper.isWritable(this.destination);
+            return true;
+        } catch (e) {
             return false;
         }
+    }.bind(this);
 
-        // TODO
-        return true;
-    };
-
+    /**
+     * @returns {exports}
+     * @constructor
+     */
     this.validate = function Validate() {
-        if (!isSourceValid.call(this)) {
+        if (!isSourceValid()) {
             throw new Error('Invalid subtitle url!');
         }
 
-        if (!isDestinationWritable.call(this)) {
-            throw new Error('Destination isn\'t writable!');
+        if (!isDestinationWritable()) {
+            throw new Error('Destination doesn\'t writable!');
         }
 
         return this;
     };
 
-    return this.validate();
+    return this;
 };

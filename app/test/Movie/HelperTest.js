@@ -20,10 +20,9 @@ var createUnwritableDirDirectory = function (path) {
     return createDirectoryIfNotExists(path, '556');
 };
 
-
 describe("Movie/Helper", function() {
-    var unreadableDir = './test/Movie/Test_UnreadableDir/';
-    var unwritableDir = './test/Movie/Test_UnwritableDir/';
+    var unreadableDir = './test/Test_UnreadableDir/';
+    var unwritableDir = './test/Test_UnwritableDir/';
 
     describe("isDir", function() {
         it("validDirShouldPass", function() {
@@ -31,7 +30,7 @@ describe("Movie/Helper", function() {
             expect(actual).to.equal(true);
         });
         it("invalidDirectoryShouldThrowEnoentError", function() {
-            expect(Helper.isDir.bind(Helper, './ValidatorTest.js')).to.throw(/ENOENT/); // No such file or dir
+            expect(Helper.isDir.bind(Helper, './HelperTest.js')).to.throw(/ENOENT/); // No such file or dir
         });
         it("unreadableDirectoryShouldThrowEaccessError", function() {
             createUnreadableDirectory(unreadableDir);

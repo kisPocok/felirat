@@ -30,7 +30,8 @@
     "material-design-lite": "1.0.*",
     "nw-builder": "2.*",
     "mocha": "*",
-    "chai": "*"
+    "chai": "*",
+    "sinon": "*"
   },
   "window": {
     "title": "DogTitle",
