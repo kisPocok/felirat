@@ -21,8 +21,8 @@ var createUnwritableDirDirectory = function (path) {
 };
 
 describe("Movie/Helper", function() {
-    var unreadableDir = './test/Test_UnreadableDir/';
-    var unwritableDir = './test/Test_UnwritableDir/';
+    var unreadableDir = './tests/Test_UnreadableDir/';
+    var unwritableDir = './tests/Test_UnwritableDir/';
 
     describe("isDir", function() {
         it("validDirShouldPass", function() {
@@ -40,7 +40,7 @@ describe("Movie/Helper", function() {
 
     describe("isWritable", function() {
         it("writableDirectoryShouldPass", function() {
-            expect(Helper.isWritable.bind(Helper, './test/Movie/')).to.not.throw(/E/);
+            expect(Helper.isWritable.bind(Helper, './tests/Movie/')).to.not.throw(/E/);
         });
         it("unwritableDirectoryShouldThrowEaccessError", function() {
             createUnwritableDirDirectory(unwritableDir);
@@ -50,7 +50,7 @@ describe("Movie/Helper", function() {
 
     describe("isReadable", function() {
         it("readDirectoryShouldPass", function() {
-            expect(Helper.isReadable.bind(Helper, './test/Movie/')).to.not.throw(/E/);
+            expect(Helper.isReadable.bind(Helper, './tests/Movie/')).to.not.throw(/E/);
         });
         it("readableDirectoryShouldntThrowEaccessError", function() {
             createUnreadableDirectory(unreadableDir);
@@ -113,7 +113,7 @@ describe("Movie/Helper", function() {
     });
 
     describe("srtFileName", function () {
-        it("alma", function() {
+        it("shouldBeValidFileName", function() {
             var lang = 'hun';
             var fileName = 'The.Walking.Dead.s01e01';
             var actual = Helper.srtFileName(fileName, lang);
