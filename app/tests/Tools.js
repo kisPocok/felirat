@@ -1,9 +1,9 @@
 'use strict';
 
 var fs = require('fs');
-var path = require('path');
+//var path = require('path');
 
-module.exports = new (function TestTools() {
+module.exports = (function TestTools() {
     var getRootDir = function () {
         return __dirname;
     };
@@ -31,7 +31,6 @@ module.exports = new (function TestTools() {
         'getRootDir': getRootDir,
         'createExampleDirectory': createExampleDirectory,
         'createUnreadableDirectory': createUnreadableDirectory,
-        'createUnwritableDirDirectory': createUnwritableDirDirectory,
+        'createUnwritableDirDirectory': createUnwritableDirDirectory
     };
-
 })();
