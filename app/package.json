@@ -38,7 +38,8 @@
     "nw-builder": "2.*",
     "mocha": "*",
     "chai": "*",
-    "sinon": "*"
+    "sinon": "*",
+    "nodegit": "*"
   },
   "window": {
     "title": "DogTitle",
