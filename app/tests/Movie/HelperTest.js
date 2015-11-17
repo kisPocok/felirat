@@ -1,24 +1,10 @@
 'use strict';
 
 var fs = require('fs');
+var tools = require('../Tools');
 var expect = require("chai").expect;
 var should = require("chai").should();
 var Helper = require('../../resources/Movie/Helper');
-
-var createDirectoryIfNotExists = function (path, chmod) {
-    try {
-        fs.lstatSync(path);
-    } catch (e) {
-        fs.mkdirSync(path);
-    }
-    fs.chmodSync(path, chmod);
-};
-var createUnreadableDirectory = function (path) {
-    return createDirectoryIfNotExists(path, '312');
-};
-var createUnwritableDirDirectory = function (path) {
-    return createDirectoryIfNotExists(path, '556');
-};
 
 describe("Movie/Helper", function() {
     var unreadableDir = './tests/Test_UnreadableDir/';
@@ -33,7 +19,7 @@ describe("Movie/Helper", function() {
             expect(Helper.isDir.bind(Helper, './HelperTest.js')).to.throw(/ENOENT/); // No such file or dir
         });
         it("unreadableDirectoryShouldThrowEaccessError", function() {
-            createUnreadableDirectory(unreadableDir);
+            tools.createUnreadableDirectory(unreadableDir);
             expect(Helper.isDir.bind(Helper, unreadableDir)).to.throw(/EACCES/); // permission denied
         });
     });
@@ -43,7 +29,7 @@ describe("Movie/Helper", function() {
             expect(Helper.isWritable.bind(Helper, './tests/Movie/')).to.not.throw(/E/);
         });
         it("unwritableDirectoryShouldThrowEaccessError", function() {
-            createUnwritableDirDirectory(unwritableDir);
+            tools.createUnwritableDirDirectory(unwritableDir);
             expect(Helper.isWritable.bind(Helper, unwritableDir)).to.throw(/EACCES/); // permission denied
         });
     });
@@ -53,7 +39,7 @@ describe("Movie/Helper", function() {
             expect(Helper.isReadable.bind(Helper, './tests/Movie/')).to.not.throw(/E/);
         });
         it("readableDirectoryShouldntThrowEaccessError", function() {
-            createUnreadableDirectory(unreadableDir);
+            tools.createUnreadableDirectory(unreadableDir);
             expect(Helper.isReadable.bind(Helper, unreadableDir)).to.throw(/EACCES/); // permission denied
         });
     });
