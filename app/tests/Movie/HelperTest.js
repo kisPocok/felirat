@@ -24,6 +24,25 @@ describe("Movie/Helper", function() {
         });
     });
 
+    describe("isVideo", function() {
+        it("mp4ShouldBeVideo", function() {
+            var actual = Helper.isVideo('example.mp4');
+            expect(actual).to.equal(true);
+        });
+        it("mkvShouldBeVideo", function() {
+            var actual = Helper.isVideo('example.mkv');
+            expect(actual).to.equal(true);
+        });
+        it("mp3ShouldBeFalse", function() {
+            var actual = Helper.isVideo('example.mp3');
+            expect(actual).to.equal(false);
+        });
+        it("directoryShouldBeFalse", function() {
+            var actual = Helper.isVideo('example/');
+            expect(actual).to.equal(false);
+        });
+    });
+
     describe("isWritable", function() {
         it("writableDirectoryShouldPass", function() {
             expect(Helper.isWritable.bind(Helper, './tests/Movie/')).to.not.throw(/E/);

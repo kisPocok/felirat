@@ -2,6 +2,7 @@ var fs = require('fs');
 
 var MovieHelper = function MovieHelper() {
     this.validSubtitleExtension = 'srt';
+    this.validVideoExtensions = ['mp4', 'mkv'];
 
     this.isDir = function (path) {
         this.isReadable(path);
@@ -25,6 +26,10 @@ var MovieHelper = function MovieHelper() {
             throw new Error('Missing fileName!');
         }
         return fileName.split('.').pop();
+    };
+
+    this.isVideo = function (fileName) {
+        return this.validVideoExtensions.indexOf(this.getFileExtension(fileName)) !== -1;
     };
 
     this.isSubtitle = function (fileName) {
