@@ -2,6 +2,7 @@
 
 var Q = require('q');
 var fs = require('fs');
+var minimatch = require("minimatch");
 
 var MovieHelper = require('../Movie/Helper');
 var File = require('./File');
@@ -75,6 +76,81 @@ module.exports = function ScanLogic() {
         return fileList.filter(function (File) {
             return !File.isDir;
         });
+    };
+
+    /**
+     * Collect Video files recursively in the given director
+     *
+     * Required parameters: path
+     * Optional parameters: depth, fileFilter, directoryFilter
+     *
+     * @param {{path,depth,fileFilter,directoryFilter}} config
+     * @returns {[File]}
+     */
+    this.collectFiles = function (config) {
+        if (!config.path) {
+            throw new Error('Path is required!');
+        }
+
+        // Control max depth
+        if (config.depth < 1) {
+            return [];
+        }
+
+        var self = this;
+        var results = [];
+        var list = fs.readdirSync(config.path);
+        var callback = function (fileName) {
+            var path = config.path + '/' + fileName;
+            var stat = fs.statSync(path);
+            if (stat && stat.isDirectory()) {
+                if (checkFilter(config.directoryFilter, fileName)) {
+                    results = results.concat(
+                        self.collectFiles({
+                            path: path,
+                            depth: config.depth - 1,
+                            fileFilter: config.fileFilter,
+                            directoryFilter: config.directoryFilter
+                        })
+                    );
+                }
+            } else {
+                if (checkFilter(config.fileFilter, fileName)) {
+                    // add filtered files only
+                    var item = new File(config.path, fileName, false);
+                    results.push(item);
+                }
+            }
+        };
+
+        list.map(callback);
+        return results;
+    };
+
+    /**
+     * @param {string} filter
+     * @param {string} fileName
+     * @returns {boolean}
+     */
+    var checkFilter = function (filter, fileName) {
+        return !(filter && minimatch(fileName, filter) === false);
+    };
+
+    /**
+     * Get video files from a specified directory
+     *
+     * @param {string} path
+     * @param {number} depth
+     * @returns {[File]}
+     */
+    this.collectVideoFiles = function (path, depth) {
+        var params = {
+            path: path,
+            depth: depth || 1,
+            fileFilter: '*.+(' + MovieHelper.validVideoExtensions.join('|') + ')',
+            directoryFilter: '!.*'
+        };
+        return this.collectFiles(params);
     };
 
     return this;

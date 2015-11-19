@@ -70,4 +70,49 @@ describe("Scan/Logic", function() {
             });
         });
     });
+
+    describe("collectVideoFiles", function() {
+        it("shouldReturnFile", function () {
+            var results = Scan.collectVideoFiles(videoFolder, 2);
+
+            expect(results).to.be.instanceof(Array);
+            expect(results.length).to.be.equal(3);
+
+            results.map(function (file) {
+                expect(file).to.be.instanceof(File);
+                expect(file.isDir).to.be.false;
+                expect(file.isVideo).to.be.true;
+
+                var contain = file.path.indexOf(file.fileName);
+                expect(contain).to.be.equal(file.path.length - file.fileName.length);
+            });
+        });
+
+        it("depth2ShouldFindVideoIn1DepthDir", function () {
+            var results = Scan.collectVideoFiles(videoFolder + '/1DepthDir', 2);
+            expect(results.length).to.be.equal(1);
+        });
+        it("depth2ShouldFindNoVideoIn1DepthDir", function () {
+            var results = Scan.collectVideoFiles(videoFolder + '/1DepthDir', 1);
+            expect(results.length).to.be.equal(0);
+        });
+
+        it("depth3ShouldFindVideoIn2DepthDir", function () {
+            var results = Scan.collectVideoFiles(videoFolder + '/2DepthDir', 3);
+            expect(results.length).to.be.equal(1);
+        });
+        it("depth3ShouldFindNoVideoIn2DepthDir", function () {
+            var results = Scan.collectVideoFiles(videoFolder + '/2DepthDir', 2);
+            expect(results.length).to.be.equal(0);
+        });
+
+        it("depth4ShouldFindVideoIn3DepthDir", function () {
+            var results = Scan.collectVideoFiles(videoFolder + '/3DepthDir', 4);
+            expect(results.length).to.be.equal(1);
+        });
+        it("depth4ShouldFindNoVideoIn3DepthDir", function () {
+            var results = Scan.collectVideoFiles(videoFolder + '/3DepthDir', 3);
+            expect(results.length).to.be.equal(0);
+        });
+    });
 });
