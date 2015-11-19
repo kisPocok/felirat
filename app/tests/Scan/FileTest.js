@@ -8,10 +8,12 @@ describe("Scan/File", function() {
         var file = new File(__dirname, 'FileTest.js');
 
         file.should.have.property('path');
-        file.should.have.property('isDir');
         file.should.have.property('fileName');
+        file.should.have.property('isDir');
+        file.should.have.property('isVideo');
 
         expect(file.isDir).to.be.false;
+        expect(file.isVideo).to.be.false;
         expect(file.path).to.be.equal(__filename);
     });
 });
